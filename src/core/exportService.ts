@@ -130,7 +130,7 @@ export async function runExportActivePage() {
       state.setExportPreviews(blobsToPreviewItems([file]))
       state.setExportDialog({
         type: 'ios_save',
-        message: t(state.locale, 'saveToAlbum'),
+        message: t(state.locale, 'mobileSaveHint'),
       })
     } else {
       downloadBlob(file.blob, file.name)
@@ -170,7 +170,7 @@ export async function runExportAllPages() {
       state.setExportPreviews(blobsToPreviewItems(files))
       state.setExportDialog({
         type: 'ios_save',
-        message: t(state.locale, 'saveToAlbum'),
+        message: t(state.locale, 'mobileSaveHint'),
       })
     } else if (files.length === 1) {
       downloadBlob(files[0].blob, files[0].name)

@@ -1,6 +1,8 @@
 .app-shell {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+  /* minmax(0,1fr) 防止头部内容过宽时把整列轨道撑破视口（手机端横向溢出的根因） */
+  grid-template-columns: minmax(0, 1fr);
   height: 100%;
   max-height: 100dvh;
   overflow: hidden;
@@ -116,13 +118,31 @@
 }
 
 @media (max-width: 1023px) {
+  /* 手机端头部换成两行：第一行 品牌 + 操作按钮，第二行 页标签横向滚动。
+     避免单行内容超出屏宽把语言按钮挤出屏幕。 */
   .app-header {
-    padding: 8px var(--space-sm);
-    gap: var(--space-sm);
+    flex-wrap: wrap;
+    padding: 8px var(--space-sm) 4px;
+    gap: 8px;
   }
 
   .app-header h1 {
     font-size: 18px;
+  }
+
+  .brand-block {
+    order: 1;
+    margin-right: auto;
+  }
+
+  .header-actions {
+    order: 2;
+  }
+
+  .app-header .page-tabs {
+    order: 3;
+    flex: 1 1 100%;
+    min-width: 100%;
   }
 
   .app-body {

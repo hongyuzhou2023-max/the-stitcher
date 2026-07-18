@@ -1153,11 +1153,28 @@
   justify-content: flex-end;
 }
 
+/* 手机保存提示：醒目的强调色卡片，指导用户长按图片保存 */
+.save-hint {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--accent-soft-strong);
+  color: var(--accent-hover) !important;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
 .ios-preview-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 16px;
+}
+
+/* 允许长按弹出系统「存储图像」菜单 */
+.ios-preview-list img {
+  -webkit-touch-callout: default;
+  -webkit-user-select: auto;
+  user-select: auto;
 }
 
 .ios-preview-list figure {

@@ -98,6 +98,8 @@ export const messages = {
     cancel: '取消',
     exportAtLimit: '按设备上限导出',
     saveToAlbum: '保存到相册',
+    mobileSaveHint:
+      '请直接长按下方图片，在弹出菜单中选择「存储图像 / 保存图片」即可存入相册。保存完成后再点「完成」关闭。',
     done: '完成',
     skippedEmpty: '「{name}」没有照片，已跳过',
     nothingToExport: '没有可导出的拼图',
@@ -214,6 +216,8 @@ export const messages = {
     cancel: 'Cancel',
     exportAtLimit: 'Export at device limit',
     saveToAlbum: 'Save to Photos',
+    mobileSaveHint:
+      'Touch and hold each image below, then choose “Save Image / Add to Photos” from the menu. Tap “Done” only after saving.',
     done: 'Done',
     skippedEmpty: '“{name}” has no photos — skipped',
     nothingToExport: 'Nothing to export',

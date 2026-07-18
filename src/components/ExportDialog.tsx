@@ -89,7 +89,7 @@ export function ExportDialog() {
     <div className="dialog-backdrop">
       <div className="dialog">
         <h2>{t('saveToAlbum')}</h2>
-        <p>{dialog.message}</p>
+        <p className="save-hint">{dialog.message}</p>
         <div className="ios-preview-list">
           {exportPreviews.map((item) => (
             <figure key={item.url}>
