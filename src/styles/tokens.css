@@ -1,0 +1,107 @@
+:root {
+  /* ============================================================
+     设计语言（参考 geometric-topology-diagram）：
+     Z 轴景深（无边框玻璃卡片 + 柔和弥散阴影）
+     + 克制配色（62% 主背景 / 30% 次级面板 / 8% 强调色）
+     + 流变学阻尼动画 + 斐波那契间距 + 黄金比例行高。
+     主题：Noir 暗房底 + 雾蓝强调（延续本 app 已定的无金配色）。
+     ============================================================ */
+
+  /* 间距：斐波那契 8/13/21/34 */
+  --space-xs: 8px;
+  --space-sm: 13px;
+  --space-md: 21px;
+  --space-lg: 34px;
+
+  /* 圆角：卡片 13，大容器 22 */
+  --radius: 10px;
+  --radius-md: 13px;
+  --radius-lg: 22px;
+
+  /* 流变学阻尼曲线：蓄力 → 贯通 → 阻尼回弹 */
+  --ease-rheo: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-rheo-strong: cubic-bezier(0.65, -0.55, 0.27, 1.55);
+  --dur-fast: 160ms;
+  --dur: 340ms;
+  --dur-strong: 560ms;
+
+  /* Noir 暗房配色 */
+  --bg-app: #0b0d14;
+  --bg-panel: rgba(24, 28, 42, 0.62);
+  --bg-panel-strong: rgba(22, 26, 38, 0.92);
+  --bg-panel-solid: #161a26;
+  --bg-elevated: rgba(255, 255, 255, 0.06);
+  --bg-hover: rgba(255, 255, 255, 0.11);
+  --border: rgba(255, 255, 255, 0.08);
+  --divider: rgba(255, 255, 255, 0.07);
+  --text: #e7eaf3;
+  --text-muted: #aeb6c9;
+  --text-faint: #6d7690;
+
+  /* 唯一强调色：雾蓝（仅用于选中/焦点/高价值动作） */
+  --accent: #6e9bb0;
+  --accent-hover: #86b0c3;
+  --accent-soft: rgba(110, 155, 176, 0.14);
+  --accent-soft-strong: rgba(110, 155, 176, 0.28);
+  --accent-contrast: #0b0d14;
+  --focus-ring: rgba(110, 155, 176, 0.22);
+
+  /* 反色激活片（克制用色：选中态用亮片而非强调色） */
+  --chip-active-bg: #e7eaf3;
+  --chip-active-text: #12151f;
+
+  --danger: #f0828b;
+
+  --touch-min: 44px;
+  --font: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont,
+    "PingFang SC", "Helvetica Neue", "Hiragino Sans GB", "Segoe UI",
+    "Microsoft YaHei", sans-serif;
+
+  /* 卡片景深：无边框，柔和弥散阴影 */
+  --card-shadow: 0 10px 34px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 18px 46px rgba(0, 0, 0, 0.55),
+    0 4px 10px rgba(0, 0, 0, 0.35);
+  --shadow: var(--card-shadow);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: var(--bg-app);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.5;
+  font-feature-settings: "tnum" 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --touch-min: 34px;
+  }
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
