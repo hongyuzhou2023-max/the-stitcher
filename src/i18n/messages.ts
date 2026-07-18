@@ -31,7 +31,7 @@ export const messages = {
     tutorialStep5Body:
       '顶部可新建多个拼图页并重命名。导出当前页或全部打包；也可用「导出项目」备份含原图的完整工程。',
     library: '素材库',
-    params: '参数',
+    params: '参数及导出',
     dropHintDesktop: '拖拽图片到左侧栏，将自动填入空槽',
     dropHintMobile: '点击从相册选择',
     pickImages: '点击选择图片',
@@ -149,7 +149,7 @@ export const messages = {
     tutorialStep5Body:
       'Add multiple pages up top and rename them. Export one page or all; “Export project” backs up settings plus originals.',
     library: 'Library',
-    params: 'Settings',
+    params: 'Settings & Export',
     dropHintDesktop: 'Drop images here to fill empty slots',
     dropHintMobile: 'Tap to choose from photos',
     pickImages: 'Choose images',
