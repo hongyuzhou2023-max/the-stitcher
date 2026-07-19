@@ -69,7 +69,11 @@ const html = `<!doctype html>
 <title>拼图圣手 The Stitcher</title>
 <style>
   html,body,#root{margin:0;height:100%;background:#0e0f12;color:#e8eaed}
+  html[data-theme="light"],html[data-theme="light"] body,html[data-theme="light"] #root{background:#edf3f5;color:#1f2f38}
 </style>
+<script>
+try{var __t=localStorage.getItem('stitcher_theme_v1');if(__t==='light'||__t==='dark')document.documentElement.setAttribute('data-theme',__t)}catch(e){}
+</script>
 </head>
 <body>
 <div id="root"></div>

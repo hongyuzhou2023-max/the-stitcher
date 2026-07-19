@@ -42,11 +42,36 @@ export type AppDialog =
       estimateLabel?: string
     }
 
+export type UiTheme = 'dark' | 'light'
+
+const THEME_KEY = 'stitcher_theme_v1'
+
+function readStoredTheme(): UiTheme {
+  try {
+    const v = localStorage.getItem(THEME_KEY)
+    if (v === 'light' || v === 'dark') return v
+  } catch {
+    /* ignore */
+  }
+  return 'dark'
+}
+
+function applyTheme(theme: UiTheme) {
+  document.documentElement.setAttribute('data-theme', theme)
+  try {
+    localStorage.setItem(THEME_KEY, theme)
+  } catch {
+    /* ignore */
+  }
+}
+
 type AppState = {
   hydrated: boolean
   locale: Locale
+  theme: UiTheme
   onboardingDone: boolean
   showOnboarding: boolean
+  showAbout: boolean
   assets: Asset[]
   pages: Page[]
   activePageId: string
@@ -62,8 +87,11 @@ type AppState = {
   setHydrated: (v: boolean) => void
   setLocale: (locale: Locale) => void
   toggleLocale: () => void
+  setTheme: (theme: UiTheme) => void
+  toggleTheme: () => void
   completeOnboarding: () => void
   setShowOnboarding: (v: boolean) => void
+  setShowAbout: (v: boolean) => void
   openTutorial: () => void
   setCanvasLimits: (limits: CanvasLimits) => void
   setMobileSheet: (sheet: MobileSheet) => void
@@ -152,8 +180,10 @@ function queuePersist(get: () => AppState) {
 export const useAppStore = create<AppState>((set, get) => ({
   hydrated: false,
   locale: 'zh',
+  theme: readStoredTheme(),
   onboardingDone: false,
   showOnboarding: false,
+  showAbout: false,
   assets: [],
   pages: [initialPage],
   activePageId: initialPage.id,
@@ -176,6 +206,15 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ locale: next })
     queuePersist(get)
   },
+  setTheme: (theme) => {
+    applyTheme(theme)
+    set({ theme })
+  },
+  toggleTheme: () => {
+    const next = get().theme === 'dark' ? 'light' : 'dark'
+    applyTheme(next)
+    set({ theme: next })
+  },
   completeOnboarding: () => {
     try {
       localStorage.setItem(ONBOARD_KEY, '1')
@@ -186,6 +225,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     queuePersist(get)
   },
   setShowOnboarding: (v) => set({ showOnboarding: v }),
+  setShowAbout: (v) => set({ showAbout: v }),
   openTutorial: () => set({ showOnboarding: true }),
   setCanvasLimits: (limits) => set({ canvasLimits: limits }),
   setMobileSheet: (sheet) => set({ mobileSheet: sheet }),

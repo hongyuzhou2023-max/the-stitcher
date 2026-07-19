@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { useAppStore } from '../store/appStore'
 import { useT } from '../i18n/useT'
 import {
@@ -153,8 +153,8 @@ export function ModePanel() {
   const setExportDialog = useAppStore((s) => s.setExportDialog)
   const replaceProject = useAppStore((s) => s.replaceProject)
   const showToast = useAppStore((s) => s.showToast)
+  const setShowAbout = useAppStore((s) => s.setShowAbout)
   const importRef = useRef<HTMLInputElement>(null)
-  const [aboutOpen, setAboutOpen] = useState(false)
 
   const page = pages.find((p) => p.id === activePageId)!
   const mode = page.mode
@@ -425,44 +425,11 @@ export function ModePanel() {
         <button
           type="button"
           className="about-me-link"
-          onClick={() => setAboutOpen(true)}
+          onClick={() => setShowAbout(true)}
         >
           {t('aboutMe')}
         </button>
       </div>
-
-      {aboutOpen && (
-        <div
-          className="dialog-backdrop about-backdrop"
-          onClick={() => setAboutOpen(false)}
-          role="presentation"
-        >
-          <div
-            className="about-card"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-label={t('aboutMeTitle')}
-          >
-            <h2 className="about-title">{t('aboutMeTitle')}</h2>
-            <div className="about-poem">
-              <p>{t('aboutMeLine1')}</p>
-              <p>{t('aboutMeLine2')}</p>
-              <p>{t('aboutMeLine3')}</p>
-              <span className="about-divider" />
-              <p>{t('aboutMeLine4')}</p>
-              <p>{t('aboutMeLine5')}</p>
-              <p>{t('aboutMeLine6')}</p>
-            </div>
-            <button
-              type="button"
-              className="btn btn-primary about-close"
-              onClick={() => setAboutOpen(false)}
-            >
-              {t('close')}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

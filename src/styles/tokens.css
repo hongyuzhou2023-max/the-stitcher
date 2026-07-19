@@ -25,7 +25,7 @@
   --dur: 340ms;
   --dur-strong: 560ms;
 
-  /* Noir 暗房配色 */
+  /* Noir 暗房（默认深色主题） */
   --bg-app: #0b0d14;
   --bg-panel: rgba(24, 28, 42, 0.62);
   --bg-panel-strong: rgba(22, 26, 38, 0.92);
@@ -38,7 +38,6 @@
   --text-muted: #aeb6c9;
   --text-faint: #6d7690;
 
-  /* 唯一强调色：雾蓝（仅用于选中/焦点/高价值动作） */
   --accent: #6e9bb0;
   --accent-hover: #86b0c3;
   --accent-soft: rgba(110, 155, 176, 0.14);
@@ -46,21 +45,72 @@
   --accent-contrast: #0b0d14;
   --focus-ring: rgba(110, 155, 176, 0.22);
 
-  /* 反色激活片（克制用色：选中态用亮片而非强调色） */
   --chip-active-bg: #e7eaf3;
   --chip-active-text: #12151f;
 
   --danger: #f0828b;
+
+  --stage-bg0: #151c26;
+  --stage-bg1: #0e131a;
+  --stage-bg: #0d1017;
+  --stage-inset: rgba(255, 255, 255, 0.03);
+
+  --about-backdrop: rgba(6, 8, 14, 0.55);
+  --swap-btn-bg: rgba(16, 20, 30, 0.82);
+  --swap-btn-fg: #e7eaf3;
+  --spinner-track: rgba(255, 255, 255, 0.12);
 
   --touch-min: 44px;
   --font: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont,
     "PingFang SC", "Helvetica Neue", "Hiragino Sans GB", "Segoe UI",
     "Microsoft YaHei", sans-serif;
 
-  /* 卡片景深：无边框，柔和弥散阴影 */
   --card-shadow: 0 10px 34px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3);
   --card-shadow-hover: 0 18px 46px rgba(0, 0, 0, 0.55),
     0 4px 10px rgba(0, 0, 0, 0.35);
+  --shadow: var(--card-shadow);
+}
+
+/* Mist 亮色主题：雾蓝底 + 柔白面板 */
+[data-theme='light'] {
+  --bg-app: #edf3f5;
+  --bg-panel: rgba(255, 255, 255, 0.72);
+  --bg-panel-strong: rgba(255, 255, 255, 0.94);
+  --bg-panel-solid: #ffffff;
+  --bg-elevated: rgba(41, 58, 66, 0.06);
+  --bg-hover: rgba(41, 58, 66, 0.1);
+  --border: rgba(58, 96, 112, 0.12);
+  --divider: rgba(58, 96, 112, 0.1);
+  --text: #1f2f38;
+  --text-muted: #597481;
+  --text-faint: #93abb6;
+
+  --accent: #5b93a8;
+  --accent-hover: #487c90;
+  --accent-soft: rgba(91, 147, 168, 0.14);
+  --accent-soft-strong: rgba(91, 147, 168, 0.26);
+  --accent-contrast: #ffffff;
+  --focus-ring: rgba(91, 147, 168, 0.22);
+
+  --chip-active-bg: #293a42;
+  --chip-active-text: #ffffff;
+
+  --danger: #c15c63;
+
+  --stage-bg0: #e8eef1;
+  --stage-bg1: #dfe8ec;
+  --stage-bg: #e2ecef;
+  --stage-inset: rgba(255, 255, 255, 0.65);
+
+  --about-backdrop: rgba(31, 47, 56, 0.28);
+  --swap-btn-bg: rgba(255, 255, 255, 0.92);
+  --swap-btn-fg: #1f2f38;
+  --spinner-track: rgba(41, 58, 66, 0.15);
+
+  --card-shadow: 0 10px 34px rgba(58, 96, 112, 0.1),
+    0 2px 7px rgba(58, 96, 112, 0.05);
+  --card-shadow-hover: 0 18px 46px rgba(58, 96, 112, 0.14),
+    0 4px 10px rgba(58, 96, 112, 0.06);
   --shadow: var(--card-shadow);
 }
 
@@ -80,6 +130,7 @@ body,
   line-height: 1.5;
   font-feature-settings: "tnum" 1;
   -webkit-tap-highlight-color: transparent;
+  transition: background var(--dur) var(--ease-rheo), color var(--dur) var(--ease-rheo);
 }
 
 html {

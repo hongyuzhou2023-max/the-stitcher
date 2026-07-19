@@ -6,6 +6,7 @@ import { ModePanel } from './ModePanel'
 import { BottomSheets, MobileTabBar } from './BottomSheets'
 import { ExportDialog } from './ExportDialog'
 import { Onboarding } from './Onboarding'
+import { AboutMeDialog } from './AboutMeDialog'
 import { useAppStore } from '../store/appStore'
 import { useT } from '../i18n/useT'
 import { probeCanvasLimits } from '../core/canvasProbe'
@@ -16,12 +17,18 @@ export function AppShell() {
   const setCanvasLimits = useAppStore((s) => s.setCanvasLimits)
   const hydrateFromDisk = useAppStore((s) => s.hydrateFromDisk)
   const toggleLocale = useAppStore((s) => s.toggleLocale)
+  const toggleTheme = useAppStore((s) => s.toggleTheme)
+  const theme = useAppStore((s) => s.theme)
   const openTutorial = useAppStore((s) => s.openTutorial)
   const t = useT()
 
   useEffect(() => {
     void hydrateFromDisk()
   }, [hydrateFromDisk])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
   const locale = useAppStore((s) => s.locale)
   useEffect(() => {
@@ -92,6 +99,14 @@ export function AppShell() {
           <button type="button" className="btn btn-sm" onClick={() => openTutorial()}>
             {t('replayTutorial')}
           </button>
+          <button
+            type="button"
+            className="btn btn-sm"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? t('themeToLight') : t('themeToDark')}
+          >
+            {theme === 'dark' ? t('themeToLight') : t('themeToDark')}
+          </button>
           <button type="button" className="btn btn-sm" onClick={toggleLocale}>
             {t('langSwitch')}
           </button>
@@ -112,6 +127,7 @@ export function AppShell() {
       <BottomSheets />
       <ExportDialog />
       <Onboarding />
+      <AboutMeDialog />
       {toast && <div className="toast">{toast.message}</div>}
     </div>
   )
