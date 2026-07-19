@@ -87,7 +87,7 @@ export function ExportDialog() {
 
   return (
     <div className="dialog-backdrop">
-      <div className="dialog">
+      <div className="dialog dialog-ios-save">
         <h2>{t('saveToAlbum')}</h2>
         <p className="save-hint">{dialog.message}</p>
         <div className="ios-preview-list">

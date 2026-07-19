@@ -1192,6 +1192,13 @@
   color: var(--text-faint);
 }
 
+.field-hint {
+  margin-left: 4px;
+  font-weight: 500;
+  color: var(--accent-hover);
+  letter-spacing: 0;
+}
+
 .field input[type='range'] {
   width: 100%;
   min-height: 18px;
@@ -1359,6 +1366,92 @@
   margin-top: 6px;
   font-size: 12px;
   color: var(--text-muted);
+}
+
+/* 手机导出保存：整卡一屏内完整显示（成品 + 文件名 + 完成按钮），禁止滚动 */
+@media (max-width: 1023px) {
+  .dialog-backdrop {
+    padding: 10px;
+    align-items: stretch;
+  }
+
+  .dialog.dialog-ios-save {
+    width: 100%;
+    max-width: none;
+    height: min(100%, var(--app-height, 100dvh));
+    max-height: min(100%, var(--app-height, 100dvh));
+    margin: auto 0;
+    padding: 12px 12px 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dialog.dialog-ios-save h2 {
+    margin: 0;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .dialog.dialog-ios-save .save-hint {
+    margin: 0;
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.45;
+    flex-shrink: 0;
+  }
+
+  .dialog.dialog-ios-save .ios-preview-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0;
+    gap: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dialog.dialog-ios-save .ios-preview-list figure {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .dialog.dialog-ios-save .ios-preview-list img {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+  }
+
+  .dialog.dialog-ios-save .ios-preview-list figcaption {
+    margin-top: 4px;
+    flex-shrink: 0;
+    font-size: 11px;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dialog.dialog-ios-save .dialog-actions {
+    flex-shrink: 0;
+    margin-top: 2px;
+    justify-content: stretch;
+  }
+
+  .dialog.dialog-ios-save .dialog-actions .btn {
+    flex: 1;
+    min-height: 44px;
+  }
 }
 
 .muted {

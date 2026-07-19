@@ -578,6 +578,9 @@ function ModeBControls({
       <div className="field">
         <label>
           {t('stripGap')} {(mode.tight ? 0 : mode.gap * 100).toFixed(0)}%
+          {wallpaper && (
+            <span className="field-hint">{t('wallpaperGapHint')}</span>
+          )}
         </label>
         <input
           type="range"
@@ -613,8 +616,11 @@ function ModeCControls({
   const t = useT()
   return (
     <div className="mode-controls">
-      <div className="field field-inline">
-        <label>{t('canvasRatio')}</label>
+      <div className="field">
+        <label>
+          {t('canvasRatio')}
+          <span className="field-hint">{t('fullscreenRatioHint')}</span>
+        </label>
         <div className="seg seg-compact">
           <button
             type="button"
