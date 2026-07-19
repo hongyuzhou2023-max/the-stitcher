@@ -147,7 +147,14 @@ body {
 
 @media (min-width: 1024px) {
   :root {
-    --touch-min: 34px;
+    --touch-min: 36px;
+  }
+
+  html,
+  body,
+  #root {
+    /* 桌面端字体整体等比放大（移动端维持不变，见基准 13px） */
+    font-size: 15px;
   }
 }
 

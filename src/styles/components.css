@@ -1565,3 +1565,109 @@
   padding: 0 10px;
   font-size: 12px;
 }
+
+/* ============================================================
+   桌面端字号等比放大（移动端沿用上方基准值，完全不受影响）。
+   根字号已在 tokens.css 中由 13px 提升到 15px，此处补齐仍使用
+   固定像素值、不随根字号联动的组件，保持整体协调、不遮挡溢出。
+   ============================================================ */
+@media (min-width: 1024px) {
+  .btn-sm {
+    font-size: 13.5px;
+  }
+
+  .action-grid .btn-action {
+    min-height: 44px;
+    padding: 6px 3px 5px;
+    font-size: 12px;
+  }
+
+  .btn-action .action-icon {
+    width: 17px;
+    height: 17px;
+  }
+
+  .page-tab .rename-btn {
+    font-size: 13px;
+  }
+
+  .app-credit {
+    font-size: 11px;
+  }
+
+  .about-me-link {
+    font-size: 11.5px;
+  }
+
+  .about-poem p {
+    font-size: 18.5px;
+  }
+
+  .loading-text {
+    font-size: 20px;
+  }
+
+  .onboard-card p {
+    font-size: 15.5px;
+  }
+
+  .dropzone {
+    font-size: 13px;
+  }
+
+  .thumb-item .del {
+    font-size: 15px;
+  }
+
+  .slot-overlay .slot-hint {
+    font-size: 13px;
+  }
+
+  .mode-panel {
+    padding: 13px 15px;
+    gap: 8px;
+  }
+
+  .section-title {
+    font-size: 11.5px;
+  }
+
+  .mode-switch button {
+    font-size: 11px;
+    padding: 7px 3px 6px;
+  }
+
+  .mode-switch button .mode-icon {
+    width: 21px;
+    height: 27px;
+  }
+
+  .field label {
+    font-size: 12.5px;
+  }
+
+  .toast {
+    font-size: 14px;
+  }
+
+  .dialog h2 {
+    font-size: 19.5px;
+  }
+
+  .dialog p {
+    font-size: 15px;
+  }
+
+  .muted {
+    font-size: 13px;
+  }
+
+  .seg-compact button {
+    min-height: 28px;
+    font-size: 13px;
+  }
+
+  .ios-preview-list figcaption {
+    font-size: 13px;
+  }
+}

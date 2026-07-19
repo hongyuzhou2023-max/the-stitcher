@@ -173,7 +173,14 @@ body {
 
 @media (min-width: 1024px) {
   :root {
-    --touch-min: 34px;
+    --touch-min: 36px;
+  }
+
+  html,
+  body,
+  #root {
+    /* \u684C\u9762\u7AEF\u5B57\u4F53\u6574\u4F53\u7B49\u6BD4\u653E\u5927\uFF08\u79FB\u52A8\u7AEF\u7EF4\u6301\u4E0D\u53D8\uFF0C\u89C1\u57FA\u51C6 13px\uFF09 */
+    font-size: 15px;
   }
 }
 
@@ -421,6 +428,17 @@ img {
     overflow: auto;
     min-height: 0;
     flex: 1;
+  }
+}
+
+/* \u684C\u9762\u7AEF\u54C1\u724C\u533A\u5B57\u4F53\u968F\u6574\u4F53\u5B57\u53F7\u4E00\u8D77\u653E\u5927\uFF08\u79FB\u52A8\u7AEF\u5728\u4E0A\u65B9\u5355\u72EC\u8986\u76D6\uFF0C\u4E0D\u53D7\u5F71\u54CD\uFF09 */
+@media (min-width: 1024px) {
+  .app-header h1 {
+    font-size: 26px;
+  }
+
+  .brand-sub {
+    font-size: 13px;
   }
 }
 `,document.head.appendChild(t)})();(()=>{let t=document.createElement("style");t.textContent=`/* \u6309\u94AE\uFF1A\u65E0\u8FB9\u6846\u8F6F\u5E95 + \u963B\u5C3C\u52A8\u6548\uFF1B\u4E3B\u6309\u94AE\u4E3A\u552F\u4E00\u5927\u9762\u79EF\u5F3A\u8C03\u8272 */
@@ -1989,6 +2007,112 @@ img {
   min-height: 26px;
   padding: 0 10px;
   font-size: 12px;
+}
+
+/* ============================================================
+   \u684C\u9762\u7AEF\u5B57\u53F7\u7B49\u6BD4\u653E\u5927\uFF08\u79FB\u52A8\u7AEF\u6CBF\u7528\u4E0A\u65B9\u57FA\u51C6\u503C\uFF0C\u5B8C\u5168\u4E0D\u53D7\u5F71\u54CD\uFF09\u3002
+   \u6839\u5B57\u53F7\u5DF2\u5728 tokens.css \u4E2D\u7531 13px \u63D0\u5347\u5230 15px\uFF0C\u6B64\u5904\u8865\u9F50\u4ECD\u4F7F\u7528
+   \u56FA\u5B9A\u50CF\u7D20\u503C\u3001\u4E0D\u968F\u6839\u5B57\u53F7\u8054\u52A8\u7684\u7EC4\u4EF6\uFF0C\u4FDD\u6301\u6574\u4F53\u534F\u8C03\u3001\u4E0D\u906E\u6321\u6EA2\u51FA\u3002
+   ============================================================ */
+@media (min-width: 1024px) {
+  .btn-sm {
+    font-size: 13.5px;
+  }
+
+  .action-grid .btn-action {
+    min-height: 44px;
+    padding: 6px 3px 5px;
+    font-size: 12px;
+  }
+
+  .btn-action .action-icon {
+    width: 17px;
+    height: 17px;
+  }
+
+  .page-tab .rename-btn {
+    font-size: 13px;
+  }
+
+  .app-credit {
+    font-size: 11px;
+  }
+
+  .about-me-link {
+    font-size: 11.5px;
+  }
+
+  .about-poem p {
+    font-size: 18.5px;
+  }
+
+  .loading-text {
+    font-size: 20px;
+  }
+
+  .onboard-card p {
+    font-size: 15.5px;
+  }
+
+  .dropzone {
+    font-size: 13px;
+  }
+
+  .thumb-item .del {
+    font-size: 15px;
+  }
+
+  .slot-overlay .slot-hint {
+    font-size: 13px;
+  }
+
+  .mode-panel {
+    padding: 13px 15px;
+    gap: 8px;
+  }
+
+  .section-title {
+    font-size: 11.5px;
+  }
+
+  .mode-switch button {
+    font-size: 11px;
+    padding: 7px 3px 6px;
+  }
+
+  .mode-switch button .mode-icon {
+    width: 21px;
+    height: 27px;
+  }
+
+  .field label {
+    font-size: 12.5px;
+  }
+
+  .toast {
+    font-size: 14px;
+  }
+
+  .dialog h2 {
+    font-size: 19.5px;
+  }
+
+  .dialog p {
+    font-size: 15px;
+  }
+
+  .muted {
+    font-size: 13px;
+  }
+
+  .seg-compact button {
+    min-height: 28px;
+    font-size: 13px;
+  }
+
+  .ios-preview-list figcaption {
+    font-size: 13px;
+  }
 }
 `,document.head.appendChild(t)})();var a2=ut(jt(),1);function ad(){return(0,a2.jsx)(n2,{})}var id=ut(jt(),1);(0,r2.createRoot)(document.getElementById("root")).render((0,id.jsx)(i2.StrictMode,{children:(0,id.jsx)(ad,{})}));})();
 
