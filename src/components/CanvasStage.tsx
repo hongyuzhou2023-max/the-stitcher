@@ -25,6 +25,30 @@ function fitCanvas(
   }
 }
 
+/** 相邻两个槽位之间的互换按钮位置（画布百分比坐标） */
+function swapButtonPos(
+  a: { x: number; y: number; w: number; h: number },
+  b: { x: number; y: number; w: number; h: number },
+): { cx: number; cy: number; vertical: boolean } {
+  const dx = b.x + b.w / 2 - (a.x + a.w / 2)
+  const dy = b.y + b.h / 2 - (a.y + a.h / 2)
+  const vertical = Math.abs(dy) >= Math.abs(dx)
+  if (vertical) {
+    // 上下相邻：按钮放在两图交界处、靠右侧
+    return {
+      cx: Math.min(a.x + a.w, b.x + b.w),
+      cy: (a.y + a.h + b.y) / 2,
+      vertical: true,
+    }
+  }
+  // 左右相邻：按钮放在两图交界处、垂直居中
+  return {
+    cx: (a.x + a.w + b.x) / 2,
+    cy: (Math.max(a.y, b.y) + Math.min(a.y + a.h, b.y + b.h)) / 2,
+    vertical: false,
+  }
+}
+
 export function CanvasStage() {
   const pages = useAppStore((s) => s.pages)
   const activePageId = useAppStore((s) => s.activePageId)
@@ -32,6 +56,7 @@ export function CanvasStage() {
   const selectedSlotIndex = useAppStore((s) => s.selectedSlotIndex)
   const setSelectedSlot = useAppStore((s) => s.setSelectedSlot)
   const placeAsset = useAppStore((s) => s.placeAsset)
+  const swapSlots = useAppStore((s) => s.swapSlots)
   const t = useT()
 
   const page = pages.find((p) => p.id === activePageId)!
@@ -142,6 +167,47 @@ export function CanvasStage() {
                 <span className="slot-hint">{t('slotLabel', { n: i + 1 })}</span>
               )}
             </div>
+          )
+        })}
+        {drawSlots.slice(0, -1).map((a, i) => {
+          const b = drawSlots[i + 1]
+          // 两个槽位都为空时没有可交换的内容，不显示按钮
+          const hasContent =
+            page.slots[i]?.assetId != null || page.slots[i + 1]?.assetId != null
+          if (!hasContent) return null
+          const pos = swapButtonPos(a, b)
+          return (
+            <button
+              key={`swap-${i}`}
+              type="button"
+              className="slot-swap-btn"
+              title={t('swapOrder')}
+              aria-label={t('swapOrder')}
+              style={{
+                left: pos.vertical
+                  ? `calc(${pos.cx * 100}% - 26px)`
+                  : `${pos.cx * 100}%`,
+                top: `${pos.cy * 100}%`,
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                swapSlots(i, i + 1)
+              }}
+            >
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={pos.vertical ? undefined : { transform: 'rotate(90deg)' }}
+              >
+                <path d="M5.5 2.5v9M5.5 2.5 3 5M5.5 2.5 8 5" />
+                <path d="M10.5 13.5v-9M10.5 13.5 8 11M10.5 13.5 13 11" />
+              </svg>
+            </button>
           )
         })}
       </div>

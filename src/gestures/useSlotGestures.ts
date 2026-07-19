@@ -63,6 +63,9 @@ export function useSlotGestures({
     }
 
     const onPointerDown = (e: PointerEvent) => {
+      // 互换按钮的点击不能被手势层捕获：setPointerCapture 会把 pointerup
+      // 劫持到容器上，导致按钮永远收不到完整 click
+      if ((e.target as HTMLElement).closest?.('.slot-swap-btn')) return
       el.setPointerCapture(e.pointerId)
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
 

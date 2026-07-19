@@ -89,6 +89,7 @@ type AppState = {
   placeAssets: (assetIds: string[]) => void
   updateSlotTransform: (slotIndex: number, transform: Partial<Transform>) => void
   updateSlotFrameScale: (slotIndex: number, frameScale: number) => void
+  swapSlots: (a: number, b: number) => void
   fillSlotsFromLibrary: () => void
 
   replaceProject: (data: {
@@ -374,6 +375,22 @@ export const useAppStore = create<AppState>((set, get) => ({
         nextEmpty >= 0
           ? nextEmpty
           : Math.min(s.selectedSlotIndex, slots.length - 1),
+    })
+    queuePersist(get)
+  },
+
+  swapSlots: (a, b) => {
+    const s = get()
+    const page = s.pages.find((p) => p.id === s.activePageId)
+    if (!page) return
+    if (!page.slots[a] || !page.slots[b] || a === b) return
+    // 整体交换槽位对象：照片连同它的取景（平移/缩放/旋转/框大小）一起换位
+    const slots = [...page.slots]
+    ;[slots[a], slots[b]] = [slots[b], slots[a]]
+    set({
+      pages: s.pages.map((p) =>
+        p.id === s.activePageId ? { ...p, slots } : p,
+      ),
     })
     queuePersist(get)
   },

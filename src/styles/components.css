@@ -905,6 +905,51 @@
   user-select: none;
 }
 
+/* 相邻照片之间的一键互换按钮 */
+.slot-swap-btn {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 20, 30, 0.82);
+  color: #e7eaf3;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  z-index: 5;
+  touch-action: manipulation;
+  transition: background var(--dur-fast) var(--ease-rheo),
+    color var(--dur-fast) var(--ease-rheo),
+    transform var(--dur-fast) var(--ease-rheo);
+}
+
+.slot-swap-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.slot-swap-btn:hover {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.slot-swap-btn:active {
+  transform: translate(-50%, -50%) scale(0.92);
+}
+
+@media (max-width: 1023px) {
+  .slot-swap-btn {
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+  }
+}
+
 .mode-panel {
   padding: 11px 13px;
   display: flex;

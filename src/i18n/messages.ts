@@ -97,6 +97,7 @@ export const messages = {
       '当前设备最大可导出约 {n} px。建议在电脑上完成最终无损导出。也可确认后按设备上限降级导出（不会静默进行）。',
     cancel: '取消',
     exportAtLimit: '按设备上限导出',
+    swapOrder: '互换这两张的位置',
     saveToAlbum: '保存到相册',
     mobileSaveHint:
       '请直接长按下方图片，在弹出菜单中选择「存储图像 / 保存图片」即可存入相册。保存完成后再点「完成」关闭。',
@@ -215,6 +216,7 @@ export const messages = {
       'Max export size on this device is about {n} px. Prefer exporting on a computer for full resolution, or confirm to export at the device limit (never silent).',
     cancel: 'Cancel',
     exportAtLimit: 'Export at device limit',
+    swapOrder: 'Swap these two',
     saveToAlbum: 'Save to Photos',
     mobileSaveHint:
       'Touch and hold each image below, then choose “Save Image / Add to Photos” from the menu. Tap “Done” only after saving.',
