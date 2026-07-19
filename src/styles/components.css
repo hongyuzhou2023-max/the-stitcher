@@ -193,6 +193,129 @@
   line-height: 1.5;
 }
 
+.about-me-link {
+  display: block;
+  width: 100%;
+  margin-top: 2px;
+  padding: 2px 0 0;
+  border: none;
+  background: none;
+  color: var(--accent-hover);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: center;
+  cursor: pointer;
+  transition: color var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+
+.about-me-link:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.about-backdrop {
+  z-index: 80;
+}
+
+.about-card {
+  width: min(100%, 360px);
+  padding: 28px 26px 22px;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(110, 155, 176, 0.18), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(110, 155, 176, 0.1), transparent 50%),
+    var(--bg-panel-strong);
+  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: var(--card-shadow-hover);
+  text-align: center;
+  animation: onboard-pop var(--dur-strong) var(--ease-rheo-strong);
+}
+
+.about-title {
+  margin: 0 0 18px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.about-poem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 22px;
+}
+
+.about-poem p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.about-poem p:nth-child(-n + 3) {
+  color: var(--text);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.about-divider {
+  display: block;
+  width: 36px;
+  height: 1px;
+  margin: 8px auto;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent),
+    transparent
+  );
+}
+
+.about-close {
+  min-width: 120px;
+}
+
+/* 启动加载态 */
+.loading-shell {
+  display: grid;
+  place-items: center;
+}
+
+.loading-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.12);
+  border-top-color: var(--accent-hover);
+  animation: loading-spin 0.85s linear infinite;
+}
+
+.loading-text {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text);
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Onboarding */
 .onboard-backdrop {
   position: fixed;

@@ -110,6 +110,14 @@ export const DEFAULT_TRANSFORM: Transform = {
 /** iPhone 壁纸竖版约 9:19.5，横置条带为 19.5:9 */
 export const WALLPAPER_STRIP_ASPECT = 19.5 / 9
 
+/**
+ * 小红书「全屏笔记」安全画幅 9:16。
+ * 对标实测：旧壁纸横幅导出 3:4（≈0.75）在全屏笔记里会被左右裁切；
+ * 旧全屏竖版 9:19.5（≈0.46）又偏高，会被上下裁切。9:16（0.5625）完整呈现。
+ */
+export const XHS_FULLSCREEN_ASPECT_W = 9
+export const XHS_FULLSCREEN_ASPECT_H = 16
+
 export function createEmptySlots(count: number): Slot[] {
   return Array.from({ length: count }, () => ({
     assetId: null,
@@ -139,9 +147,9 @@ export function defaultModeB(): ModeB {
 export function defaultModeC(): ModeC {
   return {
     type: 'C',
-    ratio: '9:19.5',
+    ratio: '9:16',
     customW: 9,
-    customH: 19.5,
+    customH: 16,
   }
 }
 

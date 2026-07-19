@@ -4,6 +4,8 @@ import {
   FRAME_SCALE_MAX,
   FRAME_SCALE_MIN,
   WALLPAPER_STRIP_ASPECT,
+  XHS_FULLSCREEN_ASPECT_H,
+  XHS_FULLSCREEN_ASPECT_W,
 } from '../types'
 
 /** 白底模式下按每槽 frameScale 缩小照片框（居中，余量留白） */
@@ -25,8 +27,15 @@ export function resolveDrawSlots(page: Page, layout: LayoutResult): Rect[] {
 }
 
 function aspectForMode(mode: PageMode): { aspectW: number; aspectH: number } {
-  if (mode.type === 'A' || mode.type === 'B' || mode.type === 'D') {
+  // A/B：普通笔记 3:4；C/D：全屏笔记 9:16（C 另可选手动比例）
+  if (mode.type === 'A' || mode.type === 'B') {
     return { aspectW: 3, aspectH: 4 }
+  }
+  if (mode.type === 'D') {
+    return {
+      aspectW: XHS_FULLSCREEN_ASPECT_W,
+      aspectH: XHS_FULLSCREEN_ASPECT_H,
+    }
   }
   if (mode.ratio === '9:19.5') return { aspectW: 9, aspectH: 19.5 }
   if (mode.ratio === '9:16') return { aspectW: 9, aspectH: 16 }
@@ -93,23 +102,28 @@ function layoutA(mode: Extract<PageMode, { type: 'A' }>): Rect[] {
   }))
 }
 
-/** 黑底 3:4 内垂直堆叠固定比例横条 */
+/** 黑底画布内垂直堆叠固定比例横条；canvasAspect = 画布宽/高 */
 function layoutStrips(
   count: number,
   gapNorm: number,
   stripAspect: number,
+  canvasAspect: number,
 ): Rect[] {
-  const canvasAspect = 3 / 4
   const stripW = 1
   const stripH = (stripW * canvasAspect) / stripAspect
   const totalH = count * stripH + (count - 1) * gapNorm
-  const startY = Math.max(0, (1 - totalH) / 2)
+  // 若条带总高超出画布（间距过大），等比压缩间距与条带高度以完整装入
+  let scale = 1
+  if (totalH > 1) scale = 1 / totalH
+  const h = stripH * scale
+  const g = gapNorm * scale
+  const startY = Math.max(0, (1 - (count * h + (count - 1) * g)) / 2)
 
   return Array.from({ length: count }, (_, i) => ({
     x: 0,
-    y: startY + i * (stripH + gapNorm),
+    y: startY + i * (h + g),
     w: stripW,
-    h: stripH,
+    h,
   }))
 }
 
@@ -133,7 +147,7 @@ export function computeLayout(mode: PageMode): LayoutResult {
       aspectW,
       aspectH,
       background: '#000000',
-      slots: layoutStrips(mode.count, gap, 16 / 9),
+      slots: layoutStrips(mode.count, gap, 16 / 9, aspectW / aspectH),
     }
   }
   if (mode.type === 'D') {
@@ -142,7 +156,12 @@ export function computeLayout(mode: PageMode): LayoutResult {
       aspectW,
       aspectH,
       background: '#000000',
-      slots: layoutStrips(mode.count, gap, WALLPAPER_STRIP_ASPECT),
+      slots: layoutStrips(
+        mode.count,
+        gap,
+        WALLPAPER_STRIP_ASPECT,
+        aspectW / aspectH,
+      ),
     }
   }
   return {

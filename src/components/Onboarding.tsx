@@ -88,14 +88,14 @@ function VisualModes() {
         <span className="tut-mini tall">
           <i className="fill" />
         </span>
-        <b>9:19.5</b>
+        <b>9:16</b>
       </div>
       <div className="tut-mode-card mD">
         <span className="tut-mini black">
           <i className="strip thin s1" />
           <i className="strip thin s2" />
         </span>
-        <b>19.5:9</b>
+        <b>9:16</b>
       </div>
     </div>
   )

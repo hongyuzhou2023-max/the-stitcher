@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useAppStore } from '../store/appStore'
 import { useT } from '../i18n/useT'
 import {
@@ -154,6 +154,7 @@ export function ModePanel() {
   const replaceProject = useAppStore((s) => s.replaceProject)
   const showToast = useAppStore((s) => s.showToast)
   const importRef = useRef<HTMLInputElement>(null)
+  const [aboutOpen, setAboutOpen] = useState(false)
 
   const page = pages.find((p) => p.id === activePageId)!
   const mode = page.mode
@@ -421,7 +422,47 @@ export function ModePanel() {
           <p className="muted">{t('canvasLimit', { n: canvasLimits.maxSide })}</p>
         )}
         <p className="app-credit">{t('credit')}</p>
+        <button
+          type="button"
+          className="about-me-link"
+          onClick={() => setAboutOpen(true)}
+        >
+          {t('aboutMe')}
+        </button>
       </div>
+
+      {aboutOpen && (
+        <div
+          className="dialog-backdrop about-backdrop"
+          onClick={() => setAboutOpen(false)}
+          role="presentation"
+        >
+          <div
+            className="about-card"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-label={t('aboutMeTitle')}
+          >
+            <h2 className="about-title">{t('aboutMeTitle')}</h2>
+            <div className="about-poem">
+              <p>{t('aboutMeLine1')}</p>
+              <p>{t('aboutMeLine2')}</p>
+              <p>{t('aboutMeLine3')}</p>
+              <span className="about-divider" />
+              <p>{t('aboutMeLine4')}</p>
+              <p>{t('aboutMeLine5')}</p>
+              <p>{t('aboutMeLine6')}</p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary about-close"
+              onClick={() => setAboutOpen(false)}
+            >
+              {t('close')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -577,17 +618,19 @@ function ModeCControls({
         <div className="seg seg-compact">
           <button
             type="button"
-            className={mode.ratio === '9:19.5' ? 'active' : ''}
-            onClick={() => onChange({ ...mode, ratio: '9:19.5' })}
+            className={mode.ratio === '9:16' ? 'active' : ''}
+            onClick={() => onChange({ ...mode, ratio: '9:16' })}
+            title={t('ratioXhsFullscreen')}
           >
-            9:19.5
+            9:16
           </button>
           <button
             type="button"
-            className={mode.ratio === '9:16' ? 'active' : ''}
-            onClick={() => onChange({ ...mode, ratio: '9:16' })}
+            className={mode.ratio === '9:19.5' ? 'active' : ''}
+            onClick={() => onChange({ ...mode, ratio: '9:19.5' })}
+            title={t('ratioPhoneWallpaper')}
           >
-            9:16
+            9:19.5
           </button>
           <button
             type="button"

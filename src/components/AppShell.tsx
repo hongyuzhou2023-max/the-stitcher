@@ -71,8 +71,11 @@ export function AppShell() {
 
   if (!hydrated) {
     return (
-      <div className="app-shell" style={{ placeItems: 'center' }}>
-        <p className="muted">{t('processing')}…</p>
+      <div className="app-shell loading-shell">
+        <div className="loading-block" role="status" aria-live="polite">
+          <span className="loading-spinner" aria-hidden="true" />
+          <p className="loading-text">{t('loading')}…</p>
+        </div>
       </div>
     )
   }
