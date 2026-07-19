@@ -32,6 +32,26 @@ export function AppShell() {
     void probeCanvasLimits().then(setCanvasLimits)
   }, [setCanvasLimits])
 
+  /* 手机浏览器（iOS Safari / Android Chrome / 微信内嵌）地址栏收起展开时
+     可视高度动态变化，height:100% 各家解释不一，会导致画布被裁或需滚动。
+     用 visualViewport 实时把真实可见高度写进 --app-height，全平台一致。 */
+  useEffect(() => {
+    const vv = window.visualViewport
+    const setH = () => {
+      const h = Math.round(vv?.height ?? window.innerHeight)
+      document.documentElement.style.setProperty('--app-height', `${h}px`)
+    }
+    setH()
+    vv?.addEventListener('resize', setH)
+    window.addEventListener('resize', setH)
+    window.addEventListener('orientationchange', setH)
+    return () => {
+      vv?.removeEventListener('resize', setH)
+      window.removeEventListener('resize', setH)
+      window.removeEventListener('orientationchange', setH)
+    }
+  }, [])
+
   useEffect(() => {
     const allow = (e: DragEvent) => {
       if (!e.dataTransfer?.types?.includes('Files')) return

@@ -82,6 +82,18 @@ body,
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  /* 手机端禁止双击/捏合缩放整个页面（画布内的捏合缩放照片不受影响），
+     防止误缩放后页面超出屏幕需要滚动 */
+  touch-action: pan-x pan-y;
+  overscroll-behavior: none;
+}
+
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 @media (min-width: 1024px) {
   :root {
     --touch-min: 34px;

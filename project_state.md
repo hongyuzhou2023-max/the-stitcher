@@ -67,6 +67,13 @@
 - [x] 修复手势层冲突：`useSlotGestures` 的 `setPointerCapture` 会劫持按钮的 pointerup 导致 click 不触发，pointerdown 命中 `.slot-swap-btn` 时跳过手势捕获
 - [x] 桌面鼠标点击与手机触屏 tap 均经无头 Chrome 实测互换成功（像素级校验红蓝两图交换）
 
+### 手机端画布完整可见（2026-07，壁纸横幅/全屏竖版反馈）
+- [x] 新增 `--app-height`：JS 监听 `visualViewport` resize / orientationchange，把手机浏览器**真实可见高度**实时写入 CSS 变量，`.app-shell` 高度以此为准——解决 iOS Safari / Android Chrome / 微信内嵌浏览器地址栏收展时 `100%`/`100vh` 各家解释不一导致画布被裁、需要滚动的问题（全机型通用，非仅苹果）
+- [x] viewport meta 加 `maximum-scale=1, user-scalable=no, viewport-fit=cover`：禁掉双击/捏合缩放整页（画布内捏合缩放照片不受影响），刘海屏全出血
+- [x] `html` 加 `touch-action: pan-x pan-y` + `overscroll-behavior: none`，`body` `overflow: hidden`：杜绝橡皮筋滚动与手势缩放把页面拖出屏幕
+- [x] 手机端 `.app-body` 底部 padding 计入 `env(safe-area-inset-bottom)`（iPhone Home 条 / Android 手势条不遮挡底栏）
+- [x] 无头 Chrome 手机视口实测：壁纸横幅与全屏竖版画布均完整可见；把可视高度从 844 突降到 700（模拟地址栏出现）再恢复，画布均实时重排、始终无滚动
+
 ---
 
 ## 技术栈
