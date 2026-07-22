@@ -87,7 +87,31 @@ export type LayoutResult = {
   slots: Rect[]
 }
 
-export type ExportFormat = 'png' | 'jpeg'
+/**
+ * 导出格式：
+ * - png：真无损，但胶片照片体积巨大
+ * - jpeg：高质量 92%，与 100% 肉眼无差、体积约缩小 3-5 倍（推荐）
+ * - jpeg100：Canvas 满档编码，体积极大，仅特殊需求使用
+ */
+export type ExportFormat = 'png' | 'jpeg' | 'jpeg100'
+
+/** 高质量 JPEG 的编码质量（视觉无损区间） */
+export const JPEG_HQ_QUALITY = 0.92
+
+/**
+ * 导出尺寸档位（限制长边像素）：
+ * - original：按原图像素密度反推（旧行为，可能得到 6000+ px 巨图）
+ * - 4k：长边 ≤ 4096（推荐；小红书上传后会再压缩，超过此尺寸无收益，
+ *   且手机端可走单 Canvas 路径，避免分块渲染时内存爆掉导致浏览器崩溃）
+ * - 2k：长边 ≤ 2048，最省空间
+ */
+export type ExportSizePreset = 'original' | '4k' | '2k'
+
+export const EXPORT_SIZE_CAPS: Record<ExportSizePreset, number | null> = {
+  original: null,
+  '4k': 4096,
+  '2k': 2048,
+}
 
 export type CanvasLimits = {
   maxSide: number

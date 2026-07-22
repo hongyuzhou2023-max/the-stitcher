@@ -1152,8 +1152,35 @@
   color: var(--text-faint);
 }
 
+/* 格式/尺寸行：固定三等分，永不换行撑高面板 */
+.format-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
 .format-row button {
-  flex: 1;
+  padding: 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 导出尺寸估算提示：紧凑单行，不挤占面板高度 */
+.export-estimate {
+  margin: -4px 0 -3px;
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--text-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+/* 面板内容行不许被 flex 静默压扁（压扁 = 文字被裁掉看不见） */
+.mode-panel > * {
+  flex-shrink: 0;
 }
 
 .mode-switch {
@@ -1577,8 +1604,8 @@
   }
 
   .action-grid .btn-action {
-    min-height: 44px;
-    padding: 6px 3px 5px;
+    min-height: 40px;
+    padding: 5px 3px 4px;
     font-size: 12px;
   }
 
@@ -1624,8 +1651,21 @@
   }
 
   .mode-panel {
-    padding: 13px 15px;
-    gap: 8px;
+    padding: 8px 13px;
+    gap: 4px;
+  }
+
+  .field input[type='range'] {
+    min-height: 14px;
+  }
+
+  .panel-footer {
+    padding-top: 2px;
+  }
+
+  .app-credit {
+    margin-top: 3px;
+    padding-top: 5px;
   }
 
   .section-title {

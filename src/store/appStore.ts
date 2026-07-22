@@ -7,6 +7,7 @@ import {
   type Asset,
   type CanvasLimits,
   type ExportFormat,
+  type ExportSizePreset,
   type ExportPreviewItem,
   type Page,
   type PageMode,
@@ -77,6 +78,7 @@ type AppState = {
   activePageId: string
   selectedSlotIndex: number
   exportFormat: ExportFormat
+  exportSize: ExportSizePreset
   canvasLimits: CanvasLimits | null
   mobileSheet: MobileSheet
   toast: Toast
@@ -98,6 +100,7 @@ type AppState = {
   showToast: (message: string) => void
   clearToast: () => void
   setExportFormat: (f: ExportFormat) => void
+  setExportSize: (s: ExportSizePreset) => void
   setExportDialog: (d: AppDialog) => void
   setExportPreviews: (items: ExportPreviewItem[]) => void
   setExporting: (v: boolean) => void
@@ -123,6 +126,7 @@ type AppState = {
   replaceProject: (data: {
     locale: Locale
     exportFormat: ExportFormat
+    exportSize?: ExportSizePreset
     activePageId: string
     selectedSlotIndex: number
     pages: Page[]
@@ -161,6 +165,16 @@ const initialPage = makePage()
 
 const ONBOARD_KEY = 'stitcher_onboarding_done_v1'
 
+function normalizeExportFormat(v: unknown): ExportFormat {
+  if (v === 'png' || v === 'jpeg100') return v
+  return 'jpeg'
+}
+
+function normalizeExportSize(v: unknown): ExportSizePreset {
+  if (v === 'original' || v === '2k') return v
+  return '4k'
+}
+
 function queuePersist(get: () => AppState) {
   if (!get().hydrated) return
   schedulePersist(async () => {
@@ -168,6 +182,7 @@ function queuePersist(get: () => AppState) {
     return serializeProject({
       locale: s.locale,
       exportFormat: s.exportFormat,
+      exportSize: s.exportSize,
       activePageId: s.activePageId,
       selectedSlotIndex: s.selectedSlotIndex,
       pages: s.pages,
@@ -188,7 +203,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   pages: [initialPage],
   activePageId: initialPage.id,
   selectedSlotIndex: 0,
-  exportFormat: 'png',
+  // 默认「JPEG 高质量 + 4K」：与满档 JPEG 肉眼无差、体积缩小数倍，
+  // 且手机端不会因超大 Canvas 崩溃；追求原始像素可手动切回
+  exportFormat: 'jpeg',
+  exportSize: '4k',
   canvasLimits: null,
   mobileSheet: 'none',
   toast: null,
@@ -239,6 +257,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   clearToast: () => set({ toast: null }),
   setExportFormat: (f) => {
     set({ exportFormat: f })
+    queuePersist(get)
+  },
+  setExportSize: (s) => {
+    set({ exportSize: s })
     queuePersist(get)
   },
   setExportDialog: (d) => set({ exportDialog: d }),
@@ -496,7 +518,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     const activeOk = pages.some((p) => p.id === data.activePageId)
     set({
       locale: data.locale,
-      exportFormat: data.exportFormat,
+      exportFormat: normalizeExportFormat(data.exportFormat),
+      exportSize: normalizeExportSize(data.exportSize),
       pages,
       assets: data.assets,
       activePageId: activeOk ? data.activePageId : pages[0]?.id,
@@ -541,7 +564,8 @@ export const useAppStore = create<AppState>((set, get) => ({
         localOnboard || Boolean((snap as { onboardingDone?: boolean }).onboardingDone)
       set({
         locale: snap.locale === 'en' ? 'en' : 'zh',
-        exportFormat: snap.exportFormat === 'jpeg' ? 'jpeg' : 'png',
+        exportFormat: normalizeExportFormat(snap.exportFormat),
+        exportSize: normalizeExportSize(snap.exportSize),
         pages,
         assets,
         activePageId: activeOk ? snap.activePageId : pages[0].id,

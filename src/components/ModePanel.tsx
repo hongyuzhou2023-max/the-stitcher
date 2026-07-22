@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useAppStore } from '../store/appStore'
 import { useT } from '../i18n/useT'
 import {
@@ -17,6 +17,8 @@ import {
   WALLPAPER_GAP_MAX_PCT,
 } from '../types'
 import { runExportActivePage, runExportAllPages } from '../core/exportService'
+import { computeLayout } from '../core/layouts'
+import { pageHasImages, resolveExportSize } from '../core/exportSize'
 import {
   estimateProjectBytes,
   formatBytes,
@@ -147,6 +149,8 @@ export function ModePanel() {
   const assignAssetToSlot = useAppStore((s) => s.assignAssetToSlot)
   const exportFormat = useAppStore((s) => s.exportFormat)
   const setExportFormat = useAppStore((s) => s.setExportFormat)
+  const exportSize = useAppStore((s) => s.exportSize)
+  const setExportSize = useAppStore((s) => s.setExportSize)
   const exporting = useAppStore((s) => s.exporting)
   const canvasLimits = useAppStore((s) => s.canvasLimits)
   const assets = useAppStore((s) => s.assets)
@@ -160,6 +164,13 @@ export function ModePanel() {
   const mode = page.mode
   const slot = page.slots[selectedSlotIndex]
   const rotation = slot?.transform.rotation ?? 0
+
+  // 当前档位下本页的实际导出像素（帮助用户理解尺寸档位的效果）
+  const exportEstimate = useMemo(() => {
+    if (!pageHasImages(page.slots)) return null
+    const map = new Map(assets.map((a) => [a.id, a]))
+    return resolveExportSize(page, computeLayout(page.mode), map, exportSize)
+  }, [page, assets, exportSize])
 
   const setType = (type: 'A' | 'B' | 'C' | 'D') => {
     if (type === 'A') updateMode(defaultModeA())
@@ -270,19 +281,62 @@ export function ModePanel() {
       <div className="seg seg-compact format-row">
         <button
           type="button"
+          className={exportFormat === 'jpeg' ? 'active' : ''}
+          onClick={() => setExportFormat('jpeg')}
+        >
+          {t('jpegHq')}
+        </button>
+        <button
+          type="button"
+          className={exportFormat === 'jpeg100' ? 'active' : ''}
+          onClick={() => setExportFormat('jpeg100')}
+        >
+          {t('jpeg100')}
+        </button>
+        <button
+          type="button"
           className={exportFormat === 'png' ? 'active' : ''}
           onClick={() => setExportFormat('png')}
         >
           {t('pngLossless')}
         </button>
+      </div>
+
+      <div className="seg seg-compact format-row">
         <button
           type="button"
-          className={exportFormat === 'jpeg' ? 'active' : ''}
-          onClick={() => setExportFormat('jpeg')}
+          className={exportSize === '4k' ? 'active' : ''}
+          onClick={() => setExportSize('4k')}
         >
-          {t('jpeg100')}
+          {t('size4k')}
+        </button>
+        <button
+          type="button"
+          className={exportSize === '2k' ? 'active' : ''}
+          onClick={() => setExportSize('2k')}
+        >
+          {t('size2k')}
+        </button>
+        <button
+          type="button"
+          className={exportSize === 'original' ? 'active' : ''}
+          onClick={() => setExportSize('original')}
+        >
+          {t('sizeOriginal')}
         </button>
       </div>
+
+      {exportEstimate && (
+        <p
+          className="muted export-estimate"
+          title={t('exportEstimateTip')}
+        >
+          {t('exportEstimate', {
+            w: exportEstimate.width,
+            h: exportEstimate.height,
+          })}
+        </p>
+      )}
 
       <p className="section-title">{t('modeTitle')}</p>
       <div className="mode-switch">

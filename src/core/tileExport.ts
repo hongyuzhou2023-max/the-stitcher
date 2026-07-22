@@ -1,4 +1,5 @@
-import type { Asset, CanvasLimits, LayoutResult, Page } from '../types'
+import type { Asset, CanvasLimits, ExportFormat, LayoutResult, Page } from '../types'
+import { JPEG_HQ_QUALITY } from '../types'
 import { clampToLimits, fitsCanvasLimits } from './canvasProbe'
 import {
   loadPageSources,
@@ -190,11 +191,12 @@ export async function exportCollageBlob(
   width: number,
   height: number,
   limits: CanvasLimits,
-  format: 'png' | 'jpeg',
+  format: ExportFormat,
   allowDownscale: boolean,
 ): Promise<TileExportResult> {
   const mime = format === 'png' ? 'image/png' : 'image/jpeg'
-  const quality = format === 'jpeg' ? 1.0 : undefined
+  const quality =
+    format === 'jpeg100' ? 1.0 : format === 'jpeg' ? JPEG_HQ_QUALITY : undefined
 
   let targetW = width
   let targetH = height

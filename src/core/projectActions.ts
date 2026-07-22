@@ -12,6 +12,7 @@ export async function confirmAndExportProject() {
     await exportProjectZip({
       locale: s.locale,
       exportFormat: s.exportFormat,
+      exportSize: s.exportSize,
       activePageId: s.activePageId,
       selectedSlotIndex: s.selectedSlotIndex,
       pages: s.pages,

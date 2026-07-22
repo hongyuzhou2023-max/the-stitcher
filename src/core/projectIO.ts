@@ -2,7 +2,7 @@ import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import type { PersistedSnapshot } from './persist'
 import { deserializeAssets, serializeProject } from './persist'
-import type { Asset, ExportFormat, Page } from '../types'
+import type { Asset, ExportFormat, ExportSizePreset, Page } from '../types'
 import type { Locale } from '../i18n/messages'
 
 const META_NAME = 'project.json'
@@ -10,6 +10,7 @@ const META_NAME = 'project.json'
 export async function exportProjectZip(input: {
   locale: Locale
   exportFormat: ExportFormat
+  exportSize?: ExportSizePreset
   activePageId: string
   selectedSlotIndex: number
   pages: Page[]
@@ -21,6 +22,7 @@ export async function exportProjectZip(input: {
     version: snap.version,
     locale: snap.locale,
     exportFormat: snap.exportFormat,
+    exportSize: snap.exportSize,
     activePageId: snap.activePageId,
     selectedSlotIndex: snap.selectedSlotIndex,
     pages: snap.pages,
@@ -45,6 +47,7 @@ export async function exportProjectZip(input: {
 export type ImportedProject = {
   locale: Locale
   exportFormat: ExportFormat
+  exportSize?: ExportSizePreset
   activePageId: string
   selectedSlotIndex: number
   pages: Page[]
@@ -59,6 +62,7 @@ export async function importProjectZip(file: File): Promise<ImportedProject> {
     version: number
     locale: Locale
     exportFormat: ExportFormat
+    exportSize?: ExportSizePreset
     activePageId: string
     selectedSlotIndex: number
     pages: Page[]
@@ -81,7 +85,8 @@ export async function importProjectZip(file: File): Promise<ImportedProject> {
   const assets = await deserializeAssets(rows)
   return {
     locale: meta.locale === 'en' ? 'en' : 'zh',
-    exportFormat: meta.exportFormat === 'jpeg' ? 'jpeg' : 'png',
+    exportFormat: meta.exportFormat,
+    exportSize: meta.exportSize,
     activePageId: meta.activePageId,
     selectedSlotIndex: meta.selectedSlotIndex ?? 0,
     pages: meta.pages,

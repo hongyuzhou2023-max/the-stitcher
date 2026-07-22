@@ -29,7 +29,7 @@ async function exportOnePage(
 
   const layout = computeLayout(page.mode)
   const assets = assetsMap()
-  const size = resolveExportSize(page, layout, assets)
+  const size = resolveExportSize(page, layout, assets, state.exportSize)
   let limits = state.canvasLimits
   if (!limits) {
     limits = await probeCanvasLimits()

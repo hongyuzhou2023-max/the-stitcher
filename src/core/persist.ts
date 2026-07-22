@@ -1,4 +1,4 @@
-import type { Asset, Page, ExportFormat } from '../types'
+import type { Asset, Page, ExportFormat, ExportSizePreset } from '../types'
 import { loadAssetFromFile, disposeAsset } from '../image/loadAsset'
 import type { Locale } from '../i18n/messages'
 
@@ -10,6 +10,7 @@ export type PersistedSnapshot = {
   version: 1
   locale: Locale
   exportFormat: ExportFormat
+  exportSize?: ExportSizePreset
   activePageId: string
   selectedSlotIndex: number
   onboardingDone?: boolean
@@ -67,6 +68,7 @@ async function fileToBuffer(file: File): Promise<ArrayBuffer> {
 export async function serializeProject(input: {
   locale: Locale
   exportFormat: ExportFormat
+  exportSize?: ExportSizePreset
   activePageId: string
   selectedSlotIndex: number
   pages: Page[]
@@ -86,6 +88,7 @@ export async function serializeProject(input: {
     version: 1,
     locale: input.locale,
     exportFormat: input.exportFormat,
+    exportSize: input.exportSize,
     activePageId: input.activePageId,
     selectedSlotIndex: input.selectedSlotIndex,
     onboardingDone: input.onboardingDone,
