@@ -71,8 +71,9 @@ export function drawCoverImage(
 }
 
 /**
- * 照片底部柔和阴影（画在照片之前，不进入 clip）。
- * strength 0～1；blur / 透明度随强度与槽位高度变化。
+ * 斜向下投影阴影（画在照片之前，不进入 clip）。
+ * 同尺寸矩形向右下偏移 + 模糊，给整张照片立体浮起感。
+ * strength 0～1。
  */
 export function drawSlotShadow(
   ctx: CanvasRenderingContext2D,
@@ -90,21 +91,17 @@ export function drawSlotShadow(
   const dh = slot.h * canvasH
   if (dw < 2 || dh < 2) return
 
-  const blur = Math.max(4, Math.min(dw, dh) * (0.04 + 0.14 * s))
-  const offsetY = Math.max(2, dh * (0.01 + 0.035 * s))
-  const alpha = 0.12 + 0.38 * s
+  // 斜向下（右下）偏移：随强度与槽位尺寸缩放
+  const minSide = Math.min(dw, dh)
+  const offset = Math.max(3, minSide * (0.018 + 0.055 * s))
+  const blur = Math.max(4, minSide * (0.03 + 0.1 * s))
+  const alpha = 0.18 + 0.42 * s
 
   ctx.save()
   ctx.filter = `blur(${blur}px)`
   ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`
-  // 底部椭圆阴影，略窄于照片宽度，营造「托底」立体感
-  const ew = dw * (0.72 + 0.1 * s)
-  const eh = Math.max(4, dh * (0.06 + 0.08 * s))
-  const cx = dx + dw / 2
-  const cy = dy + dh + offsetY - eh * 0.2
-  ctx.beginPath()
-  ctx.ellipse(cx, cy, ew / 2, eh / 2, 0, 0, Math.PI * 2)
-  ctx.fill()
+  // 与照片同形的矩形，向右下偏移，形成经典 drop shadow
+  ctx.fillRect(dx + offset, dy + offset, dw, dh)
   ctx.restore()
 }
 
