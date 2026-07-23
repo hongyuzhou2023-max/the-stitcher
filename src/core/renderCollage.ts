@@ -44,15 +44,21 @@ export function paintCollage(
   ctx.setTransform(1, 0, 0, 1, -ox, -oy)
 
   const drawSlots = resolveDrawSlots(page, layout)
+  // 先画全部投影，再画照片，避免后画的槽位盖住前一张洒在缝隙里的柔和阴影
+  page.slots.forEach((slot, i) => {
+    const rect = drawSlots[i]
+    if (!slot.assetId || !rect) return
+    if (!sources.get(slot.assetId)) return
+    const shadow = slot.shadow ?? 0
+    if (shadow > 0.01) {
+      drawSlotShadow(ctx, rect, shadow, exportW, exportH)
+    }
+  })
   page.slots.forEach((slot, i) => {
     const rect = drawSlots[i]
     if (!slot.assetId || !rect) return
     const bitmap = sources.get(slot.assetId)
     if (!bitmap) return
-    const shadow = slot.shadow ?? 0
-    if (shadow > 0.01) {
-      drawSlotShadow(ctx, rect, shadow, exportW, exportH)
-    }
     drawCoverImage(
       ctx,
       bitmapSource(bitmap),

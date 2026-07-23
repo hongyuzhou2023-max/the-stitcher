@@ -71,8 +71,9 @@ export function drawCoverImage(
 }
 
 /**
- * 斜向下投影阴影（画在照片之前，不进入 clip）。
- * 同尺寸矩形向右下偏移 + 模糊，给整张照片立体浮起感。
+ * 照片投影：模仿外层画布卡片的柔和分层阴影
+ * （对应 CSS `0 24px 64px / 0 6px 18px` 那种自然浮起感）。
+ * 用 canvas shadowBlur 双层，主要向下、略偏右；照片随后盖住实体矩形。
  * strength 0～1。
  */
 export function drawSlotShadow(
@@ -91,18 +92,31 @@ export function drawSlotShadow(
   const dh = slot.h * canvasH
   if (dw < 2 || dh < 2) return
 
-  // 斜向下（右下）偏移：随强度与槽位尺寸缩放
-  const minSide = Math.min(dw, dh)
-  const offset = Math.max(3, minSide * (0.018 + 0.055 * s))
-  const blur = Math.max(4, minSide * (0.03 + 0.1 * s))
-  const alpha = 0.18 + 0.42 * s
+  // 以短边为参照，按外框卡片阴影的大致比例缩放
+  const ref = Math.min(dw, dh)
+  const k = 0.4 + 0.6 * s
 
-  ctx.save()
-  ctx.filter = `blur(${blur}px)`
-  ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`
-  // 与照片同形的矩形，向右下偏移，形成经典 drop shadow
-  ctx.fillRect(dx + offset, dy + offset, dw, dh)
-  ctx.restore()
+  const paintLayer = (
+    offsetX: number,
+    offsetY: number,
+    blur: number,
+    alpha: number,
+  ) => {
+    ctx.save()
+    ctx.shadowColor = `rgba(0, 0, 0, ${alpha})`
+    ctx.shadowBlur = blur
+    ctx.shadowOffsetX = offsetX
+    ctx.shadowOffsetY = offsetY
+    // 实体矩形会被随后画上的照片完全盖住，只留下投影
+    ctx.fillStyle = '#000000'
+    ctx.fillRect(dx, dy, dw, dh)
+    ctx.restore()
+  }
+
+  // 远层：大范围柔光（类 0 24px 64px）
+  paintLayer(ref * 0.01 * k, ref * 0.055 * k, ref * 0.14 * k, 0.32 * k)
+  // 近层：贴边收束（类 0 6px 18px）
+  paintLayer(ref * 0.004 * k, ref * 0.018 * k, ref * 0.045 * k, 0.28 * k)
 }
 
 /** 导出尺寸估算：槽位需覆盖的源像素（考虑旋转 AABB） */
