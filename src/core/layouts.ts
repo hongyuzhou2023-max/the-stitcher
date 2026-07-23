@@ -27,18 +27,18 @@ export function resolveDrawSlots(page: Page, layout: LayoutResult): Rect[] {
 }
 
 function aspectForMode(mode: PageMode): { aspectW: number; aspectH: number } {
-  // A/B：普通笔记 3:4；C/D：全屏笔记 9:16（C 另可选手动比例）
-  if (mode.type === 'A' || mode.type === 'B') {
+  // A/B/D：普通笔记竖屏 3:4；C：全屏笔记 9:16（另可选手动比例）
+  // D 壁纸横幅用 3:4，避免用户导出后再用手机裁成 3:4 才能发普通笔记
+  if (mode.type === 'A' || mode.type === 'B' || mode.type === 'D') {
     return { aspectW: 3, aspectH: 4 }
   }
-  if (mode.type === 'D') {
+  if (mode.ratio === '9:19.5') return { aspectW: 9, aspectH: 19.5 }
+  if (mode.ratio === '9:16') {
     return {
       aspectW: XHS_FULLSCREEN_ASPECT_W,
       aspectH: XHS_FULLSCREEN_ASPECT_H,
     }
   }
-  if (mode.ratio === '9:19.5') return { aspectW: 9, aspectH: 19.5 }
-  if (mode.ratio === '9:16') return { aspectW: 9, aspectH: 16 }
   const w = Math.max(0.01, mode.customW)
   const h = Math.max(0.01, mode.customH)
   return { aspectW: w, aspectH: h }

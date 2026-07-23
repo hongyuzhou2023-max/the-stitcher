@@ -60,7 +60,7 @@ export const messages = {
     modeC: '全屏竖版',
     modeD: '壁纸横幅',
     modeDHint:
-      '黑底 9:16 画布（小红书全屏笔记），内放 1～3 条 19.5:9 壁纸横条，导出后可完整显示、不被裁切。',
+      '黑底竖屏 3:4 画布（小红书普通笔记），内放 1～3 条 19.5:9 壁纸横条；导出即可直接发笔记，无需再用手机裁成 3:4。',
     photoCount: '照片数量',
     layoutTemplate: '布局模板',
     tplV: '竖排',
@@ -201,7 +201,7 @@ export const messages = {
     modeC: 'Fullscreen',
     modeD: 'Wallpaper',
     modeDHint:
-      'Black 9:16 canvas (Xiaohongshu full-screen note) with 1–3 wallpaper bars at 19.5:9 — exports display fully without cropping.',
+      'Black portrait 3:4 canvas (regular Xiaohongshu note) with 1–3 wallpaper bars at 19.5:9 — export and post directly, no extra phone crop to 3:4.',
     photoCount: 'Photo count',
     layoutTemplate: 'Template',
     tplV: 'Vertical',

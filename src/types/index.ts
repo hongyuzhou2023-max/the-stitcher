@@ -44,7 +44,7 @@ export type ModeC = {
   customH: number
 }
 
-/** 黑底 3:4 + 19.5:9 壁纸横条堆叠（同电影感参数） */
+/** 黑底竖屏 3:4 + 19.5:9 壁纸横条堆叠（对标小红书普通笔记，无需再裁） */
 export type ModeD = {
   type: 'D'
   count: 1 | 2 | 3
