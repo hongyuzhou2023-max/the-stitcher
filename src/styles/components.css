@@ -1189,6 +1189,51 @@
   gap: 5px;
 }
 
+.mode-switch-5 {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.mode-switch-5 button {
+  padding: 5px 1px 4px;
+  font-size: 9px;
+}
+
+.mode-switch-5 button .mode-icon {
+  width: 16px;
+  height: 20px;
+}
+
+.bg-color-row {
+  margin-top: 2px;
+}
+
+.bg-color-seg {
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.bg-color-picker-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  min-width: 36px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.bg-color-picker-wrap input[type='color'] {
+  width: 28px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
 .mode-switch button {
   display: flex;
   flex-direction: column;
@@ -1677,9 +1722,19 @@
     padding: 7px 3px 6px;
   }
 
+  .mode-switch-5 button {
+    font-size: 10px;
+    padding: 5px 1px 4px;
+  }
+
   .mode-switch button .mode-icon {
     width: 21px;
     height: 27px;
+  }
+
+  .mode-switch-5 button .mode-icon {
+    width: 17px;
+    height: 22px;
   }
 
   .field label {

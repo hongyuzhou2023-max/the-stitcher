@@ -2,17 +2,21 @@ import { useMemo, useRef } from 'react'
 import { useAppStore } from '../store/appStore'
 import { useT } from '../i18n/useT'
 import {
+  defaultBackgroundForMode,
   defaultModeA,
   defaultModeB,
   defaultModeC,
   defaultModeD,
+  defaultModeE,
   FRAME_SCALE_DEFAULT,
   FRAME_SCALE_MAX,
   FRAME_SCALE_MIN,
+  SHADOW_DEFAULT,
   type ModeA,
   type ModeB,
   type ModeC,
   type ModeD,
+  type ModeE,
   type TemplateA,
   WALLPAPER_GAP_MAX_PCT,
 } from '../types'
@@ -34,6 +38,8 @@ type ActionIconKind =
   | 'reset'
   | 'projectOut'
   | 'projectIn'
+  | 'undo'
+  | 'clear'
 
 function ActionIcon({ kind }: { kind: ActionIconKind }) {
   const common = {
@@ -99,10 +105,25 @@ function ActionIcon({ kind }: { kind: ActionIconKind }) {
           <path d="M8 8.6V12M6.6 10.6L8 12l1.4-1.4" />
         </svg>
       )
+    case 'undo':
+      return (
+        <svg {...common}>
+          <path d="M4.5 7.5H11a3 3 0 1 1 0 6H9" />
+          <path d="M6.5 5L4 7.5 6.5 10" />
+        </svg>
+      )
+    case 'clear':
+      return (
+        <svg {...common}>
+          <path d="M3.5 4.5h9" />
+          <path d="M6 4.5V3.2h4V4.5" />
+          <path d="M5 4.5l.6 8.2a1 1 0 0 0 1 .9h2.8a1 1 0 0 0 1-.9L11 4.5" />
+        </svg>
+      )
   }
 }
 
-function ModeIcon({ kind }: { kind: 'A' | 'B' | 'C' | 'D' }) {
+function ModeIcon({ kind }: { kind: 'A' | 'B' | 'C' | 'D' | 'E' }) {
   if (kind === 'A') {
     return (
       <svg className="mode-icon" viewBox="0 0 24 30" aria-hidden>
@@ -129,6 +150,14 @@ function ModeIcon({ kind }: { kind: 'A' | 'B' | 'C' | 'D' }) {
       </svg>
     )
   }
+  if (kind === 'E') {
+    return (
+      <svg className="mode-icon" viewBox="0 0 24 30" aria-hidden>
+        <rect x="1" y="1" width="22" height="28" rx="2" fill="#111" stroke="#3a3a3a" strokeWidth="0.5" />
+        <rect x="5" y="4" width="14" height="22" rx="1.5" fill="#8fa8b8" />
+      </svg>
+    )
+  }
   return (
     <svg className="mode-icon" viewBox="0 0 24 30" aria-hidden>
       <rect x="1" y="1" width="22" height="28" rx="2" fill="#000" stroke="#3a3a3a" strokeWidth="0.5" />
@@ -146,6 +175,11 @@ export function ModePanel() {
   const selectedSlotIndex = useAppStore((s) => s.selectedSlotIndex)
   const updateSlotTransform = useAppStore((s) => s.updateSlotTransform)
   const updateSlotFrameScale = useAppStore((s) => s.updateSlotFrameScale)
+  const updateSlotShadow = useAppStore((s) => s.updateSlotShadow)
+  const setPageBackground = useAppStore((s) => s.setPageBackground)
+  const pushHistory = useAppStore((s) => s.pushHistory)
+  const undo = useAppStore((s) => s.undo)
+  const historyLen = useAppStore((s) => s.history.length)
   const assignAssetToSlot = useAppStore((s) => s.assignAssetToSlot)
   const exportFormat = useAppStore((s) => s.exportFormat)
   const setExportFormat = useAppStore((s) => s.setExportFormat)
@@ -169,14 +203,38 @@ export function ModePanel() {
   const exportEstimate = useMemo(() => {
     if (!pageHasImages(page.slots)) return null
     const map = new Map(assets.map((a) => [a.id, a]))
-    return resolveExportSize(page, computeLayout(page.mode), map, exportSize)
+    return resolveExportSize(
+      page,
+      computeLayout(page.mode, page.backgroundColor),
+      map,
+      exportSize,
+    )
   }, [page, assets, exportSize])
 
-  const setType = (type: 'A' | 'B' | 'C' | 'D') => {
+  const setType = (type: 'A' | 'B' | 'C' | 'D' | 'E') => {
     if (type === 'A') updateMode(defaultModeA())
     else if (type === 'B') updateMode(defaultModeB())
     else if (type === 'C') updateMode(defaultModeC())
-    else updateMode(defaultModeD())
+    else if (type === 'D') updateMode(defaultModeD())
+    else updateMode(defaultModeE())
+  }
+
+  const onUndo = () => {
+    void (
+      window as unknown as { __stitcherEnsureMotion?: () => Promise<boolean> }
+    ).__stitcherEnsureMotion?.()
+    if (historyLen === 0) {
+      showToast(t('nothingToUndo'))
+      return
+    }
+    if (undo()) showToast(t('undone'))
+  }
+
+  const askClear = () => {
+    setExportDialog({
+      type: 'clear_confirm',
+      message: t('clearConfirmBody'),
+    })
   }
 
   const askExportProject = () => {
@@ -235,14 +293,15 @@ export function ModePanel() {
           type="button"
           className="btn btn-action"
           disabled={!slot?.assetId}
-          onClick={() =>
+          onClick={() => {
+            pushHistory()
             updateSlotTransform(selectedSlotIndex, {
               scale: 1,
               offsetX: 0.5,
               offsetY: 0.5,
               rotation: 0,
             })
-          }
+          }}
         >
           <ActionIcon kind="reset" />
           <span>{t('resetView')}</span>
@@ -264,6 +323,24 @@ export function ModePanel() {
         >
           <ActionIcon kind="projectIn" />
           <span>{t('importProject')}</span>
+        </button>
+        <button
+          type="button"
+          className="btn btn-action"
+          disabled={historyLen === 0}
+          onClick={onUndo}
+          title="Ctrl+Z"
+        >
+          <ActionIcon kind="undo" />
+          <span>{t('undo')}</span>
+        </button>
+        <button
+          type="button"
+          className="btn btn-action btn-danger"
+          onClick={askClear}
+        >
+          <ActionIcon kind="clear" />
+          <span>{t('clearAll')}</span>
         </button>
         <input
           ref={importRef}
@@ -339,13 +416,14 @@ export function ModePanel() {
       )}
 
       <p className="section-title">{t('modeTitle')}</p>
-      <div className="mode-switch">
+      <div className="mode-switch mode-switch-5">
         {(
           [
             ['A', 'modeA'],
             ['B', 'modeB'],
             ['C', 'modeC'],
             ['D', 'modeD'],
+            ['E', 'modeE'],
           ] as const
         ).map(([type, key]) => (
           <button
@@ -353,6 +431,7 @@ export function ModePanel() {
             type="button"
             className={mode.type === type ? 'active' : ''}
             onClick={() => setType(type)}
+            title={type === 'E' ? t('modeEHint') : undefined}
           >
             <ModeIcon kind={type} />
             <span>{t(key)}</span>
@@ -368,6 +447,13 @@ export function ModePanel() {
         <ModeBControls mode={mode} onChange={updateMode} wallpaper />
       )}
       {mode.type === 'C' && <ModeCControls mode={mode} onChange={updateMode} />}
+      {mode.type === 'E' && <ModeEControls mode={mode} onChange={updateMode} />}
+
+      <BackgroundColorRow
+        color={page.backgroundColor}
+        modeDefault={defaultBackgroundForMode(mode)}
+        onChange={setPageBackground}
+      />
 
       <p className="section-title">
         {t('currentSlot')} #{selectedSlotIndex + 1}
@@ -384,6 +470,7 @@ export function ModePanel() {
             max={FRAME_SCALE_MAX}
             step={0.01}
             value={slot.frameScale ?? FRAME_SCALE_DEFAULT}
+            onPointerDown={() => pushHistory()}
             onChange={(e) =>
               updateSlotFrameScale(selectedSlotIndex, Number(e.target.value))
             }
@@ -394,6 +481,23 @@ export function ModePanel() {
         <>
           <div className="field">
             <label>
+              {t('photoShadow')}{' '}
+              {Math.round((slot.shadow ?? SHADOW_DEFAULT) * 100)}%
+            </label>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={slot.shadow ?? SHADOW_DEFAULT}
+              onPointerDown={() => pushHistory()}
+              onChange={(e) =>
+                updateSlotShadow(selectedSlotIndex, Number(e.target.value))
+              }
+            />
+          </div>
+          <div className="field">
+            <label>
               {t('scale')} {slot.transform.scale.toFixed(2)}×
             </label>
             <input
@@ -402,6 +506,7 @@ export function ModePanel() {
               max={MAX_SCALE}
               step={0.01}
               value={Math.min(MAX_SCALE, slot.transform.scale)}
+              onPointerDown={() => pushHistory()}
               onChange={(e) =>
                 updateSlotTransform(selectedSlotIndex, {
                   scale: Number(e.target.value),
@@ -416,39 +521,43 @@ export function ModePanel() {
             <div className="seg seg-compact">
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  pushHistory()
                   updateSlotTransform(selectedSlotIndex, {
                     rotation: rotation - 90,
                   })
-                }
+                }}
               >
                 {t('rotLeft')}
               </button>
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  pushHistory()
                   updateSlotTransform(selectedSlotIndex, {
                     rotation: rotation + 90,
                   })
-                }
+                }}
               >
                 {t('rotRight')}
               </button>
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  pushHistory()
                   updateSlotTransform(selectedSlotIndex, {
                     rotation: rotation + 180,
                   })
-                }
+                }}
               >
                 {t('rot180')}
               </button>
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  pushHistory()
                   updateSlotTransform(selectedSlotIndex, { rotation: 0 })
-                }
+                }}
               >
                 {t('rotReset')}
               </button>
@@ -459,6 +568,7 @@ export function ModePanel() {
               max={180}
               step={1}
               value={((((rotation + 180) % 360) + 360) % 360) - 180}
+              onPointerDown={() => pushHistory()}
               onChange={(e) =>
                 updateSlotTransform(selectedSlotIndex, {
                   rotation: Number(e.target.value),
@@ -623,6 +733,119 @@ function ModeBControls({
         />
         {t('tightJoin')}
       </label>
+    </div>
+  )
+}
+
+function ModeEControls({
+  mode,
+  onChange,
+}: {
+  mode: ModeE
+  onChange: (m: ModeE) => void
+}) {
+  const t = useT()
+  return (
+    <div className="mode-controls">
+      <div className="field field-inline">
+        <label>{t('canvasRatio')}</label>
+        <div className="seg seg-compact">
+          {(
+            [
+              ['3:4', '3:4'],
+              ['9:16', '9:16'],
+              ['9:19.5', '9:19.5'],
+            ] as const
+          ).map(([ratio, label]) => (
+            <button
+              key={ratio}
+              type="button"
+              className={mode.ratio === ratio ? 'active' : ''}
+              onClick={() => onChange({ ...mode, ratio })}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="field">
+        <label>
+          {t('frameMargin')} {(mode.tight ? 0 : mode.margin * 100).toFixed(0)}%
+        </label>
+        <input
+          type="range"
+          min={0}
+          max={20}
+          step={1}
+          disabled={mode.tight}
+          value={mode.margin * 100}
+          onChange={(e) =>
+            onChange({ ...mode, margin: Number(e.target.value) / 100 })
+          }
+        />
+      </div>
+      <label className="toggle">
+        <input
+          type="checkbox"
+          checked={mode.tight}
+          onChange={(e) => onChange({ ...mode, tight: e.target.checked })}
+        />
+        {t('tightJoin')}
+      </label>
+    </div>
+  )
+}
+
+function BackgroundColorRow({
+  color,
+  modeDefault,
+  onChange,
+}: {
+  color: string | undefined
+  modeDefault: string
+  onChange: (c: string | undefined) => void
+}) {
+  const t = useT()
+  const effective = (color?.trim() || modeDefault).toLowerCase()
+  const isWhite = effective === '#ffffff' || effective === '#fff'
+  const isBlack = effective === '#000000' || effective === '#000'
+  const pickerValue = /^#[0-9a-fA-F]{6}$/.test(color ?? '')
+    ? (color as string)
+    : isWhite
+      ? '#ffffff'
+      : isBlack
+        ? '#000000'
+        : color && /^#[0-9a-fA-F]{3,8}$/.test(color)
+          ? color
+          : modeDefault
+
+  return (
+    <div className="field field-inline bg-color-row">
+      <label>{t('bgColor')}</label>
+      <div className="seg seg-compact bg-color-seg">
+        <button
+          type="button"
+          className={isWhite ? 'active' : ''}
+          onClick={() => onChange('#FFFFFF')}
+        >
+          {t('bgWhite')}
+        </button>
+        <button
+          type="button"
+          className={isBlack ? 'active' : ''}
+          onClick={() => onChange('#000000')}
+        >
+          {t('bgBlack')}
+        </button>
+        <label className="bg-color-picker-wrap" title={t('bgCustom')}>
+          <input
+            type="color"
+            value={pickerValue.length === 7 ? pickerValue : '#808080'}
+            onChange={(e) => onChange(e.target.value)}
+            aria-label={t('bgCustom')}
+          />
+        </label>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import type { Asset, LayoutResult, Page } from '../types'
-import { bitmapSource, drawCoverImage } from './coverDraw'
+import { bitmapSource, drawCoverImage, drawSlotShadow } from './coverDraw'
 import { acquireFullBitmap, releaseFullBitmap } from '../image/decodeFull'
 import { resolveDrawSlots } from './layouts'
 
@@ -49,6 +49,10 @@ export function paintCollage(
     if (!slot.assetId || !rect) return
     const bitmap = sources.get(slot.assetId)
     if (!bitmap) return
+    const shadow = slot.shadow ?? 0
+    if (shadow > 0.01) {
+      drawSlotShadow(ctx, rect, shadow, exportW, exportH)
+    }
     drawCoverImage(
       ctx,
       bitmapSource(bitmap),

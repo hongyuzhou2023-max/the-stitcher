@@ -38,7 +38,7 @@ export const messages = {
       '把照片拖进左侧素材库，或点「点击选择图片」。导入后会自动填入画布空槽。',
     tutorialStep3Title: '选择拼图模式',
     tutorialStep3Body:
-      '右侧可选白底 3:4、电影感 16:9、全屏竖版、壁纸横幅等。每种模式适合不同笔记版式。',
+      '右侧可选白底 3:4、电影感 16:9、全屏竖版、壁纸横幅、竖图加框等。每种模式适合不同笔记版式。',
     tutorialStep4Title: '调整取景',
     tutorialStep4Body:
       '在画布上拖动平移、滚轮或捏合缩放；白底模式还可单独调节每张照片框大小；支持旋转。',
@@ -59,8 +59,26 @@ export const messages = {
     modeB: '电影 16:9',
     modeC: '全屏竖版',
     modeD: '壁纸横幅',
+    modeE: '竖图加框',
     modeDHint:
       '黑底竖屏 3:4 画布（小红书普通笔记），内放 1～3 条 19.5:9 壁纸横条；导出即可直接发笔记，无需再用手机裁成 3:4。',
+    modeEHint:
+      '单张竖排照片加外框。可选 3:4、9:16（16:9 竖屏）、9:19.5（iPhone 壁纸竖版）；背景可自定义，照片可加阴影。',
+    frameMargin: '外框留白',
+    bgColor: '背景色',
+    bgWhite: '白',
+    bgBlack: '黑',
+    bgCustom: '自定义',
+    photoShadow: '底部阴影',
+    undo: '撤销',
+    clearAll: '一键清除',
+    clearConfirmTitle: '清除全部内容？',
+    clearConfirmBody:
+      '将清空素材库与所有拼图页，回到空白工程。清除前的状态可用「撤销」找回。',
+    confirmClear: '确认清除',
+    cleared: '已清除全部内容',
+    undone: '已撤销',
+    nothingToUndo: '没有可撤销的操作',
     photoCount: '照片数量',
     layoutTemplate: '布局模板',
     tplV: '竖排',
@@ -179,7 +197,7 @@ export const messages = {
       'Drag images into the left library, or tap “Choose images”. They fill empty canvas slots automatically.',
     tutorialStep3Title: 'Pick a layout mode',
     tutorialStep3Body:
-      'On the right: White 3:4, Cinematic 16:9, Fullscreen, or Wallpaper strips — each fits a different post format.',
+      'On the right: White 3:4, Cinematic 16:9, Fullscreen, Wallpaper strips, or Framed portrait — each fits a different post format.',
     tutorialStep4Title: 'Frame your shots',
     tutorialStep4Body:
       'Drag to pan, scroll or pinch to zoom. In White mode you can resize each photo frame; rotation is supported too.',
@@ -200,8 +218,26 @@ export const messages = {
     modeB: 'Cine 16:9',
     modeC: 'Fullscreen',
     modeD: 'Wallpaper',
+    modeE: 'Framed',
     modeDHint:
       'Black portrait 3:4 canvas (regular Xiaohongshu note) with 1–3 wallpaper bars at 19.5:9 — export and post directly, no extra phone crop to 3:4.',
+    modeEHint:
+      'Single portrait photo with a frame. Choose 3:4, 9:16 (vertical 16:9), or 9:19.5 (iPhone wallpaper). Custom background and photo shadow supported.',
+    frameMargin: 'Frame margin',
+    bgColor: 'Background',
+    bgWhite: 'White',
+    bgBlack: 'Black',
+    bgCustom: 'Custom',
+    photoShadow: 'Bottom shadow',
+    undo: 'Undo',
+    clearAll: 'Clear all',
+    clearConfirmTitle: 'Clear everything?',
+    clearConfirmBody:
+      'This clears the library and all collage pages, starting a blank project. You can Undo to restore the previous state.',
+    confirmClear: 'Clear',
+    cleared: 'Cleared everything',
+    undone: 'Undone',
+    nothingToUndo: 'Nothing to undo',
     photoCount: 'Photo count',
     layoutTemplate: 'Template',
     tplV: 'Vertical',

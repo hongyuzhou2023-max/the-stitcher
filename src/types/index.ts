@@ -14,11 +14,14 @@ export type Slot = {
    * 缩小后周围露出更多白边。
    */
   frameScale?: number
+  /** 照片底部阴影强度 0～1，0 为关闭 */
+  shadow?: number
 }
 
 export const FRAME_SCALE_MIN = 0.4
 export const FRAME_SCALE_MAX = 1
 export const FRAME_SCALE_DEFAULT = 1
+export const SHADOW_DEFAULT = 0
 
 export type TemplateA = 'v' | 'h' | 'grid2'
 
@@ -52,7 +55,15 @@ export type ModeD = {
   tight: boolean
 }
 
-export type PageMode = ModeA | ModeB | ModeC | ModeD
+/** 竖图加框：单张竖排照片 + 外框留白，画幅 3:4 / 9:16 / 9:19.5 */
+export type ModeE = {
+  type: 'E'
+  ratio: '3:4' | '9:16' | '9:19.5'
+  margin: number
+  tight: boolean
+}
+
+export type PageMode = ModeA | ModeB | ModeC | ModeD | ModeE
 
 export type Page = {
   id: string
@@ -60,6 +71,8 @@ export type Page = {
   customName: string | null
   mode: PageMode
   slots: Slot[]
+  /** 自定义背景色；未设则按模式默认（A 白，其余黑） */
+  backgroundColor?: string
 }
 
 export type Asset = {
@@ -186,10 +199,23 @@ export function defaultModeD(): ModeD {
   }
 }
 
+export function defaultModeE(): ModeE {
+  return {
+    type: 'E',
+    ratio: '3:4',
+    margin: 0.06,
+    tight: false,
+  }
+}
+
 /** 壁纸横幅模式条间距滑杆上限（%）；默认 10%，故上限放宽到 20% */
 export const WALLPAPER_GAP_MAX_PCT = 20
 
 export function slotCountForMode(mode: PageMode): number {
-  if (mode.type === 'C') return 1
+  if (mode.type === 'C' || mode.type === 'E') return 1
   return mode.count
+}
+
+export function defaultBackgroundForMode(mode: PageMode): string {
+  return mode.type === 'A' ? '#FFFFFF' : '#000000'
 }

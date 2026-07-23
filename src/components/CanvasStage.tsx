@@ -60,7 +60,10 @@ export function CanvasStage() {
   const t = useT()
 
   const page = pages.find((p) => p.id === activePageId)!
-  const layout = useMemo(() => computeLayout(page.mode), [page.mode])
+  const layout = useMemo(
+    () => computeLayout(page.mode, page.backgroundColor),
+    [page.mode, page.backgroundColor],
+  )
   const drawSlots = useMemo(
     () => resolveDrawSlots(page, layout),
     [page, layout],

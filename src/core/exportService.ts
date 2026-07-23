@@ -27,7 +27,7 @@ async function exportOnePage(
     return null
   }
 
-  const layout = computeLayout(page.mode)
+  const layout = computeLayout(page.mode, page.backgroundColor)
   const assets = assetsMap()
   const size = resolveExportSize(page, layout, assets, state.exportSize)
   let limits = state.canvasLimits

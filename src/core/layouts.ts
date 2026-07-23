@@ -1,5 +1,6 @@
 import type { LayoutResult, Page, PageMode, Rect } from '../types'
 import {
+  defaultBackgroundForMode,
   FRAME_SCALE_DEFAULT,
   FRAME_SCALE_MAX,
   FRAME_SCALE_MIN,
@@ -27,11 +28,22 @@ export function resolveDrawSlots(page: Page, layout: LayoutResult): Rect[] {
 }
 
 function aspectForMode(mode: PageMode): { aspectW: number; aspectH: number } {
-  // A/B/D：普通笔记竖屏 3:4；C：全屏笔记 9:16（另可选手动比例）
-  // D 壁纸横幅用 3:4，避免用户导出后再用手机裁成 3:4 才能发普通笔记
+  // A/B/D：普通笔记竖屏 3:4
   if (mode.type === 'A' || mode.type === 'B' || mode.type === 'D') {
     return { aspectW: 3, aspectH: 4 }
   }
+  // E：竖图加框
+  if (mode.type === 'E') {
+    if (mode.ratio === '3:4') return { aspectW: 3, aspectH: 4 }
+    if (mode.ratio === '9:16') {
+      return {
+        aspectW: XHS_FULLSCREEN_ASPECT_W,
+        aspectH: XHS_FULLSCREEN_ASPECT_H,
+      }
+    }
+    return { aspectW: 9, aspectH: 19.5 }
+  }
+  // C：全屏笔记
   if (mode.ratio === '9:19.5') return { aspectW: 9, aspectH: 19.5 }
   if (mode.ratio === '9:16') {
     return {
@@ -131,13 +143,27 @@ function layoutFull(): Rect[] {
   return [{ x: 0, y: 0, w: 1, h: 1 }]
 }
 
-export function computeLayout(mode: PageMode): LayoutResult {
+/** 竖图加框：单槽居中，四周留白为「框」 */
+function layoutFramed(mode: Extract<PageMode, { type: 'E' }>): Rect[] {
+  const margin = mode.tight ? 0 : mode.margin
+  const innerW = 1 - 2 * margin
+  const innerH = 1 - 2 * margin
+  return [{ x: margin, y: margin, w: innerW, h: innerH }]
+}
+
+export function computeLayout(
+  mode: PageMode,
+  backgroundColor?: string | null,
+): LayoutResult {
   const { aspectW, aspectH } = aspectForMode(mode)
+  const background =
+    backgroundColor?.trim() || defaultBackgroundForMode(mode)
+
   if (mode.type === 'A') {
     return {
       aspectW,
       aspectH,
-      background: '#FFFFFF',
+      background,
       slots: layoutA(mode),
     }
   }
@@ -146,7 +172,7 @@ export function computeLayout(mode: PageMode): LayoutResult {
     return {
       aspectW,
       aspectH,
-      background: '#000000',
+      background,
       slots: layoutStrips(mode.count, gap, 16 / 9, aspectW / aspectH),
     }
   }
@@ -155,7 +181,7 @@ export function computeLayout(mode: PageMode): LayoutResult {
     return {
       aspectW,
       aspectH,
-      background: '#000000',
+      background,
       slots: layoutStrips(
         mode.count,
         gap,
@@ -164,10 +190,18 @@ export function computeLayout(mode: PageMode): LayoutResult {
       ),
     }
   }
+  if (mode.type === 'E') {
+    return {
+      aspectW,
+      aspectH,
+      background,
+      slots: layoutFramed(mode),
+    }
+  }
   return {
     aspectW,
     aspectH,
-    background: '#000000',
+    background,
     slots: layoutFull(),
   }
 }

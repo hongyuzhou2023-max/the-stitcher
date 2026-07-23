@@ -10,6 +10,8 @@ import { AboutMeDialog } from './AboutMeDialog'
 import { useAppStore } from '../store/appStore'
 import { useT } from '../i18n/useT'
 import { probeCanvasLimits } from '../core/canvasProbe'
+import { useShakeUndo } from '../gestures/useShakeUndo'
+import { t as tMsg } from '../i18n/messages'
 
 export function AppShell() {
   const toast = useAppStore((s) => s.toast)
@@ -20,7 +22,12 @@ export function AppShell() {
   const toggleTheme = useAppStore((s) => s.toggleTheme)
   const theme = useAppStore((s) => s.theme)
   const openTutorial = useAppStore((s) => s.openTutorial)
+  const undo = useAppStore((s) => s.undo)
+  const canUndo = useAppStore((s) => s.canUndo)
+  const showToast = useAppStore((s) => s.showToast)
+  const locale = useAppStore((s) => s.locale)
   const t = useT()
+  const { ensurePermission } = useShakeUndo()
 
   useEffect(() => {
     void hydrateFromDisk()
@@ -30,7 +37,6 @@ export function AppShell() {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
 
-  const locale = useAppStore((s) => s.locale)
   useEffect(() => {
     document.title = t('appTitle')
   }, [locale, t])
@@ -39,9 +45,6 @@ export function AppShell() {
     void probeCanvasLimits().then(setCanvasLimits)
   }, [setCanvasLimits])
 
-  /* 手机浏览器（iOS Safari / Android Chrome / 微信内嵌）地址栏收起展开时
-     可视高度动态变化，height:100% 各家解释不一，会导致画布被裁或需滚动。
-     用 visualViewport 实时把真实可见高度写进 --app-height，全平台一致。 */
   useEffect(() => {
     const vv = window.visualViewport
     const setH = () => {
@@ -76,6 +79,36 @@ export function AppShell() {
     }
   }, [])
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey
+      if (!mod || (e.key !== 'z' && e.key !== 'Z')) return
+      if (e.shiftKey) return
+      const tag = (e.target as HTMLElement)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+      if ((e.target as HTMLElement)?.isContentEditable) return
+      e.preventDefault()
+      if (!canUndo()) {
+        showToast(tMsg(locale, 'nothingToUndo'))
+        return
+      }
+      if (undo()) showToast(tMsg(locale, 'undone'))
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [canUndo, undo, showToast, locale])
+
+  useEffect(() => {
+    ;(
+      window as unknown as { __stitcherEnsureMotion?: () => Promise<boolean> }
+    ).__stitcherEnsureMotion = ensurePermission
+    return () => {
+      delete (
+        window as unknown as { __stitcherEnsureMotion?: () => Promise<boolean> }
+      ).__stitcherEnsureMotion
+    }
+  }, [ensurePermission])
+
   if (!hydrated) {
     return (
       <div className="app-shell loading-shell">
@@ -96,7 +129,11 @@ export function AppShell() {
         </div>
         <PageTabs />
         <div className="header-actions">
-          <button type="button" className="btn btn-sm" onClick={() => openTutorial()}>
+          <button
+            type="button"
+            className="btn btn-sm"
+            onClick={() => openTutorial()}
+          >
             {t('replayTutorial')}
           </button>
           <button

@@ -54,6 +54,37 @@ export function ExportDialog() {
     )
   }
 
+  if (dialog.type === 'clear_confirm') {
+    return (
+      <div className="dialog-backdrop">
+        <div className="dialog">
+          <h2>{t('clearConfirmTitle')}</h2>
+          <p>{dialog.message}</p>
+          <div className="dialog-actions">
+            <button
+              type="button"
+              className="btn"
+              onClick={() => setExportDialog(null)}
+            >
+              {t('cancel')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                useAppStore.getState().clearProject()
+                setExportDialog(null)
+                useAppStore.getState().showToast(t('cleared'))
+              }}
+            >
+              {t('confirmClear')}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (dialog.type === 'limit') {
     return (
       <div className="dialog-backdrop">

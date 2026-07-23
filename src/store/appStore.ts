@@ -34,7 +34,12 @@ type Toast = { id: string; message: string } | null
 export type AppDialog =
   | null
   | {
-      type: 'limit' | 'ios_save' | 'busy' | 'project_export_confirm'
+      type:
+        | 'limit'
+        | 'ios_save'
+        | 'busy'
+        | 'project_export_confirm'
+        | 'clear_confirm'
       message: string
       maxSide?: number
       suggestedWidth?: number
@@ -45,7 +50,19 @@ export type AppDialog =
 
 export type UiTheme = 'dark' | 'light'
 
+type HistorySnap = {
+  pages: Page[]
+  activePageId: string
+  selectedSlotIndex: number
+  assetOrder: string[]
+}
+
+const HISTORY_MAX = 40
 const THEME_KEY = 'stitcher_theme_v1'
+const ONBOARD_KEY = 'stitcher_onboarding_done_v1'
+
+/** 会话内素材保险库：删除/清空后仍可撤销恢复，不立刻 dispose */
+const assetVault = new Map<string, Asset>()
 
 function readStoredTheme(): UiTheme {
   try {
@@ -64,6 +81,63 @@ function applyTheme(theme: UiTheme) {
   } catch {
     /* ignore */
   }
+}
+
+function clonePages(pages: Page[]): Page[] {
+  return pages.map((p) => ({
+    ...p,
+    mode: { ...p.mode } as PageMode,
+    slots: p.slots.map((s) => ({
+      ...s,
+      transform: { ...s.transform },
+    })),
+  }))
+}
+
+function takeSnap(s: {
+  pages: Page[]
+  activePageId: string
+  selectedSlotIndex: number
+  assets: Asset[]
+}): HistorySnap {
+  return {
+    pages: clonePages(s.pages),
+    activePageId: s.activePageId,
+    selectedSlotIndex: s.selectedSlotIndex,
+    assetOrder: s.assets.map((a) => a.id),
+  }
+}
+
+function vaultAsset(a: Asset) {
+  assetVault.set(a.id, a)
+}
+
+function rebuildAssets(order: string[]): Asset[] {
+  const out: Asset[] = []
+  for (const id of order) {
+    const a = assetVault.get(id)
+    if (a) out.push(a)
+  }
+  return out
+}
+
+function pruneVault(keepIds: Set<string>) {
+  for (const [id, asset] of assetVault) {
+    if (keepIds.has(id)) continue
+    disposeAsset(asset)
+    assetVault.delete(id)
+  }
+}
+
+function collectKeepIds(
+  assets: Asset[],
+  history: HistorySnap[],
+): Set<string> {
+  const keep = new Set(assets.map((a) => a.id))
+  for (const h of history) {
+    for (const id of h.assetOrder) keep.add(id)
+  }
+  return keep
 }
 
 type AppState = {
@@ -85,6 +159,7 @@ type AppState = {
   exportPreviews: ExportPreviewItem[]
   exportDialog: AppDialog
   exporting: boolean
+  history: HistorySnap[]
 
   setHydrated: (v: boolean) => void
   setLocale: (locale: Locale) => void
@@ -105,6 +180,11 @@ type AppState = {
   setExportPreviews: (items: ExportPreviewItem[]) => void
   setExporting: (v: boolean) => void
 
+  pushHistory: () => void
+  undo: () => boolean
+  canUndo: () => boolean
+  clearProject: () => void
+
   addAssets: (assets: Asset[]) => void
   removeAsset: (id: string) => void
   reorderAssets: (from: number, to: number) => void
@@ -114,12 +194,14 @@ type AppState = {
   setActivePage: (id: string) => void
   renamePage: (id: string, name: string) => void
   updateMode: (mode: PageMode) => void
+  setPageBackground: (color: string | undefined) => void
   setSelectedSlot: (index: number) => void
   assignAssetToSlot: (slotIndex: number, assetId: string | null) => void
   placeAsset: (assetId: string, preferSlot?: number) => void
   placeAssets: (assetIds: string[]) => void
   updateSlotTransform: (slotIndex: number, transform: Partial<Transform>) => void
   updateSlotFrameScale: (slotIndex: number, frameScale: number) => void
+  updateSlotShadow: (slotIndex: number, shadow: number) => void
   swapSlots: (a: number, b: number) => void
   fillSlotsFromLibrary: () => void
 
@@ -163,8 +245,6 @@ function freshTransform(): Transform {
 
 const initialPage = makePage()
 
-const ONBOARD_KEY = 'stitcher_onboarding_done_v1'
-
 function normalizeExportFormat(v: unknown): ExportFormat {
   if (v === 'png' || v === 'jpeg100') return v
   return 'jpeg'
@@ -192,6 +272,14 @@ function queuePersist(get: () => AppState) {
   })
 }
 
+function withHistory(get: () => AppState, set: (partial: Partial<AppState>) => void) {
+  const s = get()
+  const snap = takeSnap(s)
+  const history = [...s.history, snap].slice(-HISTORY_MAX)
+  set({ history })
+  pruneVault(collectKeepIds(s.assets, history))
+}
+
 export const useAppStore = create<AppState>((set, get) => ({
   hydrated: false,
   locale: 'zh',
@@ -203,8 +291,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   pages: [initialPage],
   activePageId: initialPage.id,
   selectedSlotIndex: 0,
-  // 默认「JPEG 高质量 + 4K」：与满档 JPEG 肉眼无差、体积缩小数倍，
-  // 且手机端不会因超大 Canvas 崩溃；追求原始像素可手动切回
   exportFormat: 'jpeg',
   exportSize: '4k',
   canvasLimits: null,
@@ -213,6 +299,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   exportPreviews: [],
   exportDialog: null,
   exporting: false,
+  history: [],
 
   setHydrated: (v) => set({ hydrated: v }),
   setLocale: (locale) => {
@@ -267,14 +354,53 @@ export const useAppStore = create<AppState>((set, get) => ({
   setExportPreviews: (items) => set({ exportPreviews: items }),
   setExporting: (v) => set({ exporting: v }),
 
+  pushHistory: () => {
+    withHistory(get, set)
+  },
+
+  canUndo: () => get().history.length > 0,
+
+  undo: () => {
+    const s = get()
+    if (!s.history.length) return false
+    const history = [...s.history]
+    const snap = history.pop()!
+    const assets = rebuildAssets(snap.assetOrder)
+    set({
+      history,
+      pages: clonePages(snap.pages),
+      activePageId: snap.activePageId,
+      selectedSlotIndex: snap.selectedSlotIndex,
+      assets,
+    })
+    pruneVault(collectKeepIds(assets, history))
+    queuePersist(get)
+    return true
+  },
+
+  clearProject: () => {
+    withHistory(get, set)
+    const page = makePage()
+    set({
+      assets: [],
+      pages: [page],
+      activePageId: page.id,
+      selectedSlotIndex: 0,
+    })
+    pruneVault(collectKeepIds([], get().history))
+    queuePersist(get)
+  },
+
   addAssets: (assets) => {
+    withHistory(get, set)
+    for (const a of assets) vaultAsset(a)
     set((s) => ({ assets: [...s.assets, ...assets] }))
     queuePersist(get)
   },
 
   removeAsset: (id) => {
-    const asset = get().assets.find((a) => a.id === id)
-    if (asset) disposeAsset(asset)
+    withHistory(get, set)
+    // 不立刻 dispose：留在 vault 供撤销
     set((s) => ({
       assets: s.assets.filter((a) => a.id !== id),
       pages: s.pages.map((p) => ({
@@ -284,10 +410,12 @@ export const useAppStore = create<AppState>((set, get) => ({
         ),
       })),
     }))
+    pruneVault(collectKeepIds(get().assets, get().history))
     queuePersist(get)
   },
 
   reorderAssets: (from, to) => {
+    withHistory(get, set)
     set((s) => {
       if (
         from === to ||
@@ -307,6 +435,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   addPage: () => {
+    withHistory(get, set)
     const page = makePage()
     set((s) => ({
       pages: [...s.pages, page],
@@ -319,6 +448,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   closePage: (id) => {
     const { pages, activePageId } = get()
     if (pages.length <= 1) return
+    withHistory(get, set)
     const idx = pages.findIndex((p) => p.id === id)
     const nextPages = pages.filter((p) => p.id !== id)
     let nextActive = activePageId
@@ -335,6 +465,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   renamePage: (id, name) => {
+    withHistory(get, set)
     const trimmed = name.trim()
     set((s) => ({
       pages: s.pages.map((p) =>
@@ -345,6 +476,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   updateMode: (mode) => {
+    withHistory(get, set)
     const count = slotCountForMode(mode)
     set((s) => ({
       pages: s.pages.map((p) =>
@@ -357,15 +489,33 @@ export const useAppStore = create<AppState>((set, get) => ({
     queuePersist(get)
   },
 
+  setPageBackground: (color) => {
+    withHistory(get, set)
+    set((s) => ({
+      pages: s.pages.map((p) =>
+        p.id === s.activePageId
+          ? { ...p, backgroundColor: color }
+          : p,
+      ),
+    }))
+    queuePersist(get)
+  },
+
   setSelectedSlot: (index) => set({ selectedSlotIndex: index }),
 
   assignAssetToSlot: (slotIndex, assetId) => {
+    withHistory(get, set)
     set((s) => ({
       pages: s.pages.map((p) => {
         if (p.id !== s.activePageId) return p
         const slots = p.slots.map((slot, i) =>
           i === slotIndex
-            ? { assetId, transform: freshTransform() }
+            ? {
+                assetId,
+                transform: freshTransform(),
+                shadow: slot.shadow,
+                frameScale: slot.frameScale,
+              }
             : slot,
         )
         return { ...p, slots }
@@ -375,6 +525,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   placeAsset: (assetId, preferSlot) => {
+    withHistory(get, set)
     const s = get()
     const page = s.pages.find((p) => p.id === s.activePageId)
     if (!page) return
@@ -397,7 +548,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (target < 0) target = s.selectedSlotIndex
 
     const slots = page.slots.map((slot, i) =>
-      i === target ? { assetId, transform: freshTransform() } : slot,
+      i === target
+        ? {
+            assetId,
+            transform: freshTransform(),
+            shadow: slot.shadow,
+            frameScale: slot.frameScale,
+          }
+        : slot,
     )
     const nextEmpty = slots.findIndex((slot) => slot.assetId == null)
 
@@ -412,6 +570,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   placeAssets: (assetIds) => {
     if (!assetIds.length) return
+    withHistory(get, set)
     const s = get()
     const page = s.pages.find((p) => p.id === s.activePageId)
     if (!page) return
@@ -420,12 +579,22 @@ export const useAppStore = create<AppState>((set, get) => ({
     let ai = 0
     for (let i = 0; i < slots.length && ai < assetIds.length; i++) {
       if (slots[i].assetId == null) {
-        slots[i] = { assetId: assetIds[ai++], transform: freshTransform() }
+        slots[i] = {
+          assetId: assetIds[ai++],
+          transform: freshTransform(),
+          shadow: slots[i].shadow,
+          frameScale: slots[i].frameScale,
+        }
       }
     }
     let idx = s.selectedSlotIndex
     while (ai < assetIds.length && slots.length > 0) {
-      slots[idx] = { assetId: assetIds[ai++], transform: freshTransform() }
+      slots[idx] = {
+        assetId: assetIds[ai++],
+        transform: freshTransform(),
+        shadow: slots[idx].shadow,
+        frameScale: slots[idx].frameScale,
+      }
       idx = (idx + 1) % slots.length
     }
     const nextEmpty = slots.findIndex((slot) => slot.assetId == null)
@@ -446,18 +615,19 @@ export const useAppStore = create<AppState>((set, get) => ({
     const page = s.pages.find((p) => p.id === s.activePageId)
     if (!page) return
     if (!page.slots[a] || !page.slots[b] || a === b) return
-    // 整体交换槽位对象：照片连同它的取景（平移/缩放/旋转/框大小）一起换位
+    withHistory(get, set)
     const slots = [...page.slots]
     ;[slots[a], slots[b]] = [slots[b], slots[a]]
     set({
-      pages: s.pages.map((p) =>
-        p.id === s.activePageId ? { ...p, slots } : p,
+      pages: get().pages.map((p) =>
+        p.id === get().activePageId ? { ...p, slots } : p,
       ),
     })
     queuePersist(get)
   },
 
   updateSlotTransform: (slotIndex, transform) => {
+    // 连续手势：由调用方在 pointerdown 时 pushHistory，此处不重复推
     set((s) => ({
       pages: s.pages.map((p) => {
         if (p.id !== s.activePageId) return p
@@ -485,13 +655,31 @@ export const useAppStore = create<AppState>((set, get) => ({
     queuePersist(get)
   },
 
+  updateSlotShadow: (slotIndex, shadow) => {
+    set((s) => ({
+      pages: s.pages.map((p) => {
+        if (p.id !== s.activePageId) return p
+        const slots = p.slots.map((slot, i) =>
+          i === slotIndex
+            ? { ...slot, shadow: Math.min(1, Math.max(0, shadow)) }
+            : slot,
+        )
+        return { ...p, slots }
+      }),
+    }))
+    queuePersist(get)
+  },
+
   fillSlotsFromLibrary: () => {
+    withHistory(get, set)
     const { assets, activePageId, pages } = get()
     const page = pages.find((p) => p.id === activePageId)
     if (!page || !assets.length) return
-    const filled = page.slots.map((_, i) => ({
+    const filled = page.slots.map((slot, i) => ({
       assetId: assets[i]?.id ?? null,
       transform: freshTransform(),
+      shadow: slot.shadow,
+      frameScale: slot.frameScale,
     }))
     const nextEmpty = filled.findIndex((slot) => slot.assetId == null)
     set((s) => ({
@@ -505,6 +693,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   replaceProject: (data) => {
     disposeAllAssets(get().assets)
+    for (const a of assetVault.values()) disposeAsset(a)
+    assetVault.clear()
     const pages = data.pages.map((p) => {
       const migrated = migratePage(p as unknown as Record<string, unknown>)
       return {
@@ -515,6 +705,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         })),
       }
     })
+    for (const a of data.assets) vaultAsset(a)
     const activeOk = pages.some((p) => p.id === data.activePageId)
     set({
       locale: data.locale,
@@ -525,6 +716,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       activePageId: activeOk ? data.activePageId : pages[0]?.id,
       selectedSlotIndex: data.selectedSlotIndex ?? 0,
       hydrated: true,
+      history: [],
     })
     queuePersist(get)
   },
@@ -548,6 +740,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         return
       }
       const assets = await deserializeAssets(snap.assets)
+      for (const a of assets) vaultAsset(a)
       const pages = snap.pages.map((p) => {
         const migrated = migratePage(p as unknown as Record<string, unknown>)
         return {
@@ -573,6 +766,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         hydrated: true,
         onboardingDone: onboard,
         showOnboarding: !onboard,
+        history: [],
       })
       if (assets.length || pages.length > 1) {
         const { t } = await import('../i18n/messages')

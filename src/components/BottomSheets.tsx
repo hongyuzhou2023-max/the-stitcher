@@ -53,7 +53,17 @@ export function MobileTabBar() {
       <button
         type="button"
         className={sheet === 'params' ? 'active' : ''}
-        onClick={() => setMobileSheet(sheet === 'params' ? 'none' : 'params')}
+        onClick={() => {
+          const next = sheet === 'params' ? 'none' : 'params'
+          setMobileSheet(next)
+          if (next === 'params') {
+            void (
+              window as unknown as {
+                __stitcherEnsureMotion?: () => Promise<boolean>
+              }
+            ).__stitcherEnsureMotion?.()
+          }
+        }}
       >
         {t('params')}
       </button>

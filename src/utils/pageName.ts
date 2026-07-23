@@ -23,12 +23,15 @@ export function migratePage(raw: Record<string, unknown>): Page {
   const id = String(raw.id ?? '')
   const mode = raw.mode as Page['mode']
   const slots = raw.slots as Page['slots']
+  const backgroundColor =
+    typeof raw.backgroundColor === 'string' ? raw.backgroundColor : undefined
   if ('customName' in raw) {
     return {
       id,
       customName: (raw.customName as string | null) ?? null,
       mode,
       slots,
+      backgroundColor,
     }
   }
   const name = typeof raw.name === 'string' ? raw.name.trim() : ''
@@ -38,5 +41,6 @@ export function migratePage(raw: Record<string, unknown>): Page {
     customName: name && !isDefault ? name : null,
     mode,
     slots,
+    backgroundColor,
   }
 }

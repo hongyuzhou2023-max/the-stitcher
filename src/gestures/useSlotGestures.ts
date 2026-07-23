@@ -77,6 +77,7 @@ export function useSlotGestures({
           mode = 'pan'
           lastX = e.clientX
           lastY = e.clientY
+          useAppStore.getState().pushHistory()
           useAppStore.getState().setSelectedSlot(hit)
         }
       } else if (pointers.size === 2) {
@@ -92,6 +93,7 @@ export function useSlotGestures({
         if (slotIndex >= 0 && pageRef.current.slots[slotIndex]?.assetId) {
           mode = 'pinch'
           startScale = pageRef.current.slots[slotIndex].transform.scale
+          useAppStore.getState().pushHistory()
           useAppStore.getState().setSelectedSlot(slotIndex)
         }
       }
@@ -156,6 +158,8 @@ export function useSlotGestures({
       }
     }
 
+    let wheelHistPushed = false
+
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
       const n = toNorm(e.clientX, e.clientY)
@@ -165,6 +169,14 @@ export function useSlotGestures({
       if (!slot?.assetId) return
       const delta = e.deltaY > 0 ? -0.08 : 0.08
       const next = Math.min(20, Math.max(1, slot.transform.scale + delta))
+      // 滚轮连续缩放：每个手势序列只在首次滚动时记历史
+      if (!wheelHistPushed) {
+        wheelHistPushed = true
+        useAppStore.getState().pushHistory()
+        window.setTimeout(() => {
+          wheelHistPushed = false
+        }, 400)
+      }
       useAppStore.getState().setSelectedSlot(hit)
       useAppStore.getState().updateSlotTransform(hit, { scale: next })
     }
